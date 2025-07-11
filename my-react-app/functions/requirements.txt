@@ -1,0 +1,10 @@
+firebase-functions
+transformers
+torch
+sentence-transformers
+scikit-learn
+Flask
+Flask-Cors
+requests
+google-generativeai
+google-cloud-secret-manager

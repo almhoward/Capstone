@@ -274,9 +274,11 @@ function ShopMart() {
 
   // State variables
   const [cart, setCart] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
   const [currentCategory, setCurrentCategory] = useState('all');
-  const allCategories = ['all', ...new Set(products.map(product => product.category))];
+  const allCategories = React.useMemo(() => [
+    'all',
+    ...new Set(products.map(product => product.category))
+  ], [products]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [recipeSearchTerm, setRecipeSearchTerm] = useState('');
   const [ingredientSearchTerm, setIngredientSearchTerm] = useState('');
@@ -287,10 +289,55 @@ function ShopMart() {
   const [recipeIngredients, setRecipeIngredients] = useState([]);
   const [searchedRecipeName, setSearchedRecipeName] = useState('');
 
-  // Ensure all products show by default on initial load
-  useEffect(() => {
-    setFilteredProducts(products);
-  }, [products]);
+  // Filtering and Sorting Logic using useMemo
+  const filteredProducts = React.useMemo(() => {
+    console.log("filteredProducts useMemo re-evaluating...");
+    console.log("currentCategory:", currentCategory);
+    console.log("ingredientSearchTerm:", ingredientSearchTerm);
+    console.log("recipeIngredients in useMemo:", recipeIngredients);
+    console.log("sortBy:", sortBy);
+
+    let newFilteredProducts = [...products];
+
+    // Category filtering
+    if (currentCategory !== 'all') {
+      newFilteredProducts = newFilteredProducts.filter(product => product.category === currentCategory);
+    }
+
+    // Ingredient search filtering
+    if (ingredientSearchTerm) {
+      const searchTermLower = ingredientSearchTerm.toLowerCase();
+      newFilteredProducts = newFilteredProducts.filter(product =>
+        product.name.toLowerCase().includes(searchTermLower) ||
+        product.category.toLowerCase().includes(searchTermLower)
+      );
+    }
+
+    // Recipe ingredients filtering
+    if (recipeIngredients.length > 0) {
+      const ingredientNames = recipeIngredients.map(ing => ing.toLowerCase().trim());
+      newFilteredProducts = newFilteredProducts.filter(product => {
+        const productNameLower = product.name.toLowerCase().trim();
+        return ingredientNames.some(ingredient => productNameLower.includes(ingredient) || ingredient.includes(productNameLower));
+      });
+    }
+
+    // Sorting
+    const sortedProducts = [...newFilteredProducts].sort((a, b) => {
+      if (sortBy === 'name') {
+        return a.name.localeCompare(b.name);
+      } else if (sortBy === 'price-low') {
+        return a.price - b.price;
+      } else if (sortBy === 'price-high') {
+        return b.price - a.price;
+      } else if (sortBy === 'rating') {
+        return b.rating - a.rating;
+      }
+      return 0;
+    });
+
+    return sortedProducts;
+  }, [products, currentCategory, ingredientSearchTerm, recipeIngredients, sortBy]);
 
   /**
    * Generate star rating display
@@ -322,13 +369,17 @@ function ShopMart() {
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
   const paginate = (pageNumber) => {
-    setCurrentPage(pageNumber);
+    if (pageNumber !== currentPage) {
+      setCurrentPage(pageNumber);
+    }
     window.scrollTo(0, 0); // Scroll to top of the page
   };
 
   const handleProductsPerPageChange = (e) => {
     setProductsPerPage(Number(e.target.value));
-    setCurrentPage(1); // Reset to first page when items per page changes
+    if (currentPage !== 1) {
+      setCurrentPage(1); // Reset to first page when items per page changes
+    }
   };
 
   // Event Handlers
@@ -344,8 +395,20 @@ function ShopMart() {
 
       if (data.ingredients) {
         setSearchedRecipeName(data.best_match);
-        setRecipeIngredients(data.ingredients);
-        setIngredientSearchTerm(''); // Clear ingredient search when a new recipe is searched
+        const sortedNewIngredients = [...data.ingredients].sort();
+        const sortedCurrentIngredients = [...recipeIngredients].sort();
+
+        // Deep compare the sorted arrays
+        if (JSON.stringify(sortedNewIngredients) !== JSON.stringify(sortedCurrentIngredients)) {
+          console.log("Updating recipeIngredients to:", sortedNewIngredients);
+          setRecipeIngredients(data.ingredients); // Set the unsorted array from data.ingredients
+        } else {
+          console.log("recipeIngredients content is the same, skipping update.");
+        }
+        console.log("recipeIngredients after update attempt:", recipeIngredients);
+        if (currentPage !== 1) {
+          setCurrentPage(1); // Reset to first page when a new recipe is searched
+        }
       } else {
         alert("Recipe not found!");
       }
@@ -356,16 +419,26 @@ function ShopMart() {
   };
 
   const handleCategoryFilter = (category) => {
-    setCurrentCategory(category);
-    setIngredientSearchTerm(''); // Clear ingredient search
-    setRecipeSearchTerm(''); // Clear recipe search
-    setRecipeIngredients([]); // Clear recipe ingredients when switching to category filter
-    setCurrentPage(1); // Reset to first page when category filter is applied
+    if (currentCategory !== category) {
+      setCurrentCategory(category);
+    }
+    if (recipeSearchTerm !== '') {
+      setRecipeSearchTerm(''); // Clear recipe search
+    }
+    if (recipeIngredients.length > 0) {
+      setRecipeIngredients([]); // Clear recipe ingredients when switching to category filter
+    }
+    if (currentPage !== 1) {
+      setCurrentPage(1); // Reset to first page when category filter is applied
+    }
     window.scrollTo(0, 0); // Scroll to top of the page
   };
 
   const handleSortChange = (e) => {
     setSortBy(e.target.value);
+    if (currentPage !== 1) {
+      setCurrentPage(1); // Reset to first page when sort order changes
+    }
   };
 
   

@@ -16,14 +16,15 @@ genai.configure(api_key=get_api_key())
 
 def get_ingredients(user_query: str) -> list[str]:
     # 2. Create a prompt
-    prompt = f"""List the primary and essential ingredients for {user_query}.
+    prompt = f"""List the primary and universally expected ingredients for {user_query}.
+If {user_query} refers to a common prepared dish (e.g., hamburger, sandwich, salad), include both the foundational components and widely recognized standard accompanying ingredients that are almost always served with it to complete the dish.
 Only return the ingredient names, each on a new line.
-Do not include quantities, descriptions, or any other text.
-Exclude common universal seasonings like salt and pepper unless they are a defining component of the dish.
-Focus on the core components that make up the dish."""
+Do not include quantities, descriptions, preparation steps, or any other text.
+Exclude common universal seasonings (e.g., salt, black pepper, cooking oil, water) unless they are a defining, integral, and substantial component of the dish's flavor or structure (e.g., heavily brined items, specific seasoned oils, stocks, or doughs where water content is critical).
+Prioritize ingredients that would be present in the most common or traditional preparation of the dish.Push """
 
     # 3. Generate content
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    model = genai.GenerativeModel('gemini-2.5-flash-lite-preview-06-17')
     response = model.generate_content(prompt)
 
     # 4. Return the ingredients as a list

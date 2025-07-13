@@ -568,7 +568,7 @@ Reviews: ${product.reviews}`);
         </div>
         <div className="pagination-top">
           {filteredProducts.length > 0 && (
-            <span>{currentPage} of {totalPages}</span>
+            <span>Page {currentPage} of {totalPages}</span>
           )}
         </div>
       </div>

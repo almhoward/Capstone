@@ -441,7 +441,15 @@ function ShopMart() {
     }
   };
 
-  
+  const handleIngredientSearchChange = (e) => {
+    setIngredientSearchTerm(e.target.value);
+    if (recipeIngredients.length > 0) {
+      setRecipeIngredients([]);
+    }
+    if (recipeSearchTerm) {
+      setRecipeSearchTerm('');
+    }
+  };
 
   const addToCart = (productId) => {
     const product = products.find(p => p.id === productId);
@@ -490,12 +498,7 @@ function ShopMart() {
   const viewProduct = (productId) => {
     const product = products.find(p => p.id === productId);
     if (product) {
-      alert(`Product Details:
-
-Name: ${product.name}
-Price: ${product.price.toFixed(2)}
-Rating: ${product.rating}/5
-Reviews: ${product.reviews}`);
+      alert(`Product Details:\n\nName: ${product.name}\nPrice: ${product.price.toFixed(2)}\nRating: ${product.rating}/5\nReviews: ${product.reviews}`);
     }
   };
 
@@ -523,7 +526,7 @@ Reviews: ${product.reviews}`);
               className="search-input ingredient-search-input"
               placeholder="Search for ingredients"
               value={ingredientSearchTerm}
-              onChange={(e) => setIngredientSearchTerm(e.target.value)}
+              onChange={handleIngredientSearchChange}
             />
             <button className="return-all-btn" onClick={() => handleCategoryFilter('all')}>🗑️</button>
           </div>
@@ -558,7 +561,7 @@ Reviews: ${product.reviews}`);
           </select>
         </div>
         <div className="filter-group">
-          <label>Show results per page:</label>
+          <label>Products per page:</label>
           <select className="filter-select" value={productsPerPage} onChange={handleProductsPerPageChange}>
             <option value="12">12</option>
             <option value="24">24</option>

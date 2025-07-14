@@ -280,8 +280,8 @@ function ShopMart() {
     ...new Set(products.map(product => product.category))
   ], [products]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [recipeSearchTerm, setRecipeSearchTerm] = useState('');
-  const [ingredientSearchTerm, setIngredientSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchType, setSearchType] = useState('recipe'); // 'recipe' or 'ingredient'
   const [sortBy, setSortBy] = useState('name');
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage, setProductsPerPage] = useState(24); // Default to 24 products per page
@@ -293,7 +293,6 @@ function ShopMart() {
   const filteredProducts = React.useMemo(() => {
     console.log("filteredProducts useMemo re-evaluating...");
     console.log("currentCategory:", currentCategory);
-    console.log("ingredientSearchTerm:", ingredientSearchTerm);
     console.log("recipeIngredients in useMemo:", recipeIngredients);
     console.log("sortBy:", sortBy);
 
@@ -304,9 +303,8 @@ function ShopMart() {
       newFilteredProducts = newFilteredProducts.filter(product => product.category === currentCategory);
     }
 
-    // Ingredient search filtering
-    if (ingredientSearchTerm) {
-      const searchTermLower = ingredientSearchTerm.toLowerCase();
+    if (searchType === 'ingredient' && searchTerm) {
+      const searchTermLower = searchTerm.toLowerCase();
       newFilteredProducts = newFilteredProducts.filter(product =>
         product.name.toLowerCase().includes(searchTermLower) ||
         product.category.toLowerCase().includes(searchTermLower)
@@ -337,7 +335,7 @@ function ShopMart() {
     });
 
     return sortedProducts;
-  }, [products, currentCategory, ingredientSearchTerm, recipeIngredients, sortBy]);
+  }, [products, currentCategory, searchTerm, searchType, recipeIngredients, sortBy]);
 
   /**
    * Generate star rating display
@@ -383,38 +381,40 @@ function ShopMart() {
   };
 
   // Event Handlers
-  const handleRecipeSearch = async () => {
-    if (!recipeSearchTerm) return;
+  const handleSearch = async () => {
+    if (!searchTerm) return;
 
-    try {
-      const response = await fetch(`https://us-central1-capstonesearchbar.cloudfunctions.net/searchRecipes/?query=${encodeURIComponent(recipeSearchTerm)}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
+    if (searchType === 'recipe') {
+      try {
+        const response = await fetch(`https://us-central1-capstonesearchbar.cloudfunctions.net/searchRecipes/?query=${encodeURIComponent(searchTerm)}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
 
-      if (data.ingredients) {
-        setSearchedRecipeName(data.best_match);
-        const sortedNewIngredients = [...data.ingredients].sort();
-        const sortedCurrentIngredients = [...recipeIngredients].sort();
+        if (data.ingredients) {
+          setSearchedRecipeName(data.best_match);
+          const sortedNewIngredients = [...data.ingredients].sort();
+          const sortedCurrentIngredients = [...recipeIngredients].sort();
 
-        // Deep compare the sorted arrays
-        if (JSON.stringify(sortedNewIngredients) !== JSON.stringify(sortedCurrentIngredients)) {
-          console.log("Updating recipeIngredients to:", sortedNewIngredients);
-          setRecipeIngredients(data.ingredients); // Set the unsorted array from data.ingredients
+          // Deep compare the sorted arrays
+          if (JSON.stringify(sortedNewIngredients) !== JSON.stringify(sortedCurrentIngredients)) {
+            console.log("Updating recipeIngredients to:", sortedNewIngredients);
+            setRecipeIngredients(data.ingredients); // Set the unsorted array from data.ingredients
+          } else {
+            console.log("recipeIngredients content is the same, skipping update.");
+          }
+          console.log("recipeIngredients after update attempt:", recipeIngredients);
+          if (currentPage !== 1) {
+            setCurrentPage(1); // Reset to first page when a new recipe is searched
+          }
         } else {
-          console.log("recipeIngredients content is the same, skipping update.");
+          alert("Recipe not found!");
         }
-        console.log("recipeIngredients after update attempt:", recipeIngredients);
-        if (currentPage !== 1) {
-          setCurrentPage(1); // Reset to first page when a new recipe is searched
-        }
-      } else {
-        alert("Recipe not found!");
+      } catch (error) {
+        console.error("Failed to fetch recipe:", error);
+        alert("Failed to fetch recipe. See console for details.");
       }
-    } catch (error) {
-      console.error("Failed to fetch recipe:", error);
-      alert("Failed to fetch recipe. See console for details.");
     }
   };
 
@@ -422,8 +422,8 @@ function ShopMart() {
     if (currentCategory !== category) {
       setCurrentCategory(category);
     }
-    if (recipeSearchTerm !== '') {
-      setRecipeSearchTerm(''); // Clear recipe search
+    if (searchTerm !== '') {
+      setSearchTerm(''); // Clear search term
     }
     if (recipeIngredients.length > 0) {
       setRecipeIngredients([]); // Clear recipe ingredients when switching to category filter
@@ -441,15 +441,7 @@ function ShopMart() {
     }
   };
 
-  const handleIngredientSearchChange = (e) => {
-    setIngredientSearchTerm(e.target.value);
-    if (recipeIngredients.length > 0) {
-      setRecipeIngredients([]);
-    }
-    if (recipeSearchTerm) {
-      setRecipeSearchTerm('');
-    }
-  };
+  
 
   const addToCart = (productId) => {
     const product = products.find(p => p.id === productId);
@@ -512,22 +504,31 @@ function ShopMart() {
           </div>
 
           <div className="header-center">
-            <input
-              type="text"
-              className="search-input recipe-search-input"
-              placeholder="Search for recipes"
-              value={recipeSearchTerm}
-              onChange={(e) => setRecipeSearchTerm(e.target.value)}
-              onKeyPress={(e) => { if (e.key === 'Enter') handleRecipeSearch(); }}
-            />
-            <button className="search-btn recipe-search-btn" onClick={handleRecipeSearch}>Search Recipes</button>
-            <input
-              type="text"
-              className="search-input ingredient-search-input"
-              placeholder="Search for ingredients"
-              value={ingredientSearchTerm}
-              onChange={handleIngredientSearchChange}
-            />
+            <div className="search-switch-container">
+              <span className={`switch-label ${searchType === 'recipe' ? 'active' : ''}`}>👨‍🍳 Recipe</span>
+              <label className="switch">
+                <input 
+                  type="checkbox" 
+                  checked={searchType === 'ingredient'}
+                  onChange={() => setSearchType(searchType === 'recipe' ? 'ingredient' : 'recipe')} 
+                />
+                <span className="slider round"></span>
+              </label>
+              <span className={`switch-label ${searchType === 'ingredient' ? 'active' : ''}`}>🛒 Ingredient</span>
+            </div>
+            <div className="search-container">
+              <input
+                type="text"
+                className="search-input"
+                placeholder={`Search for ${searchType}s`}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyPress={(e) => { if (e.key === 'Enter') handleSearch(); }}
+              />
+              <button className="search-btn" onClick={handleSearch}>
+                Search
+              </button>
+            </div>
             <button className="return-all-btn" onClick={() => handleCategoryFilter('all')}>🗑️</button>
           </div>
 

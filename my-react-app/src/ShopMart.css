@@ -51,18 +51,22 @@
             font-size: 2rem;
             font-weight: bold;
             color: #ffc220;
+            height: 3.5rem;
+            display: flex;
+            align-items: center;
         }
 
         .return-all-btn {
             background: #ffc220;
             color: #0071ce;
             border: none;
-            width: 3.5rem; /* Make it a circle */
-            height: 3.5rem; /* Standardized height */
-            line-height: 1.2; /* Allow text wrapping */
-            border-radius: 50%; /* Make it a circle */
+            width: 3.5rem;
+            height: 3.5rem;
+            line-height: 3.5rem;
+            border-radius: 50%;
             cursor: pointer;
             font-weight: bold;
+            font-size: 1.7rem;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
@@ -74,83 +78,169 @@
             transform: translateY(-2px);
         }
 
-        .search-input {
-            padding: 0 1rem; /* Adjusted padding */
-            height: 3.5rem; /* Standardized height */
-            border: none;
-            border-radius: 25px;
-            font-size: 1rem;
-            outline: none;
-        }
+        .search-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    padding: 0.5rem;
+    border-radius: 25px;
+}
 
-        .search-input.recipe-search-input {
-            flex: 2; /* Allow it to grow more */
-            max-width: 700px; /* Increased max width */
-        }
+.search-switch-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* Increased gap for better spacing */
+    background-color: #f0f0f0;
+    height: 3.5rem;
+    min-width: 8.5rem;
+    padding: 0 1rem;
+    border-radius: 50px; /* Pill shape */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
 
-        .search-input.ingredient-search-input {
-            flex: 1; /* Allow it to grow */
-            min-width: 300px; /* Increased minimum width */
-        }
+.switch-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    transition: color 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
 
-        .search-btn {
-            background: #ffc220;
-            color: #0071ce;
-            border: none;
-            padding: 0 1.5rem; /* Adjusted padding */
-            height: 3.5rem; /* Standardized height */
-            line-height: 1.2; /* Allow text wrapping */
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
+.switch-label.active {
+    color: #0071ce;
+}
 
-        .search-btn.recipe-search-btn {
-            flex-shrink: 0; /* Prevent shrinking */
-        }
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px; /* Adjusted size */
+  height: 28px; /* Adjusted size */
+}
 
-        .cart-icon {
-            position: relative;
-            background: #ffc220;
-            color: #0071ce;
-            border: none;
-            width: 3.5rem; /* Standardized width */
-            height: 3.5rem; /* Standardized height */
-            line-height: 3.5rem; /* Center icon vertically */
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-            display: flex; /* Use flex to center content */
-            align-items: center; /* Center vertically */
-            justify-content: center; /* Center horizontally */
-        }
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
 
-        .cart-icon:hover {
-            background: #ffb800;
-            transform: scale(1.1);
-        }
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Bounce effect */
+}
 
-        .cart-count {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #e53e3e;
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px; /* Adjusted size */
+  width: 20px;  /* Adjusted size */
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Bounce effect */
+}
+
+input:checked + .slider {
+  background-color: #0071ce;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #0071ce;
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px); /* Adjusted distance */
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 28px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+.switch:hover .slider {
+    background-color: #bbb;
+}
+
+.switch:hover input:checked + .slider {
+    background-color: #005ca8;
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 0 1rem;
+    font-size: 1rem;
+    min-width: 300px;
+}
+
+.search-btn {
+    background: #ffc220;
+    color: #0071ce;
+    border: none;
+    padding: 0 1.5rem;
+    height: 2.5rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+/* Cart Icon Styles */
+.cart-icon {
+  position: relative;
+  background: #ffc220;
+  color: #0071ce;
+  border: none;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 2rem; /* Larger icon */
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  outline: none;
+}
+
+.cart-icon:hover {
+  background: #ffb800;
+  transform: scale(1.08);
+}
+
+.cart-count {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  background: #e53e3e;
+  color: white;
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: bold;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+  z-index: 2;
+  pointer-events: none;
+}
 
         /* Navigation */
         .nav {

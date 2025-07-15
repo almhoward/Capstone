@@ -1,6 +1,29 @@
 import React, { useState, useMemo } from 'react';
 import './ShopMart.css';
 
+// SVG Star Components
+const FullStar = ({ size = 22 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="#FFC107" stroke="#555" strokeWidth="0.7" strokeLinejoin="round" style={{marginRight: 2}}>
+    <polygon points="12,2 15,9 22,9.5 17,14.5 18.5,22 12,18.5 5.5,22 7,14.5 2,9.5 9,9" />
+  </svg>
+);
+const HalfStar = ({ size = 22 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" style={{marginRight: 2}}>
+    <defs>
+      <linearGradient id="half-grad">
+        <stop offset="50%" stopColor="#FFC107"/>
+        <stop offset="50%" stopColor="#E0E0E0"/>
+      </linearGradient>
+    </defs>
+    <polygon points="12,2 15,9 22,9.5 17,14.5 18.5,22 12,18.5 5.5,22 7,14.5 2,9.5 9,9" fill="url(#half-grad)" stroke="#555" strokeWidth="0.7" strokeLinejoin="round" />
+  </svg>
+);
+const EmptyStar = ({ size = 22 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="0.7" strokeLinejoin="round" style={{marginRight: 2}}>
+    <polygon points="12,2 15,9 22,9.5 17,14.5 18.5,22 12,18.5 5.5,22 7,14.5 2,9.5 9,9" />
+  </svg>
+);
+
 function ShopMart() {
   // Sample product data
   const products = useMemo(() => [
@@ -284,9 +307,10 @@ function ShopMart() {
   const [searchType, setSearchType] = useState('recipe'); // 'recipe' or 'ingredient'
   const [sortBy, setSortBy] = useState('name');
   const [currentPage, setCurrentPage] = useState(1);
-  const [productsPerPage, setProductsPerPage] = useState(24); // Default to 24 products per page
+  const [productsPerPage, setProductsPerPage] = useState(25); // Default to 25 products per page for 5 columns
   
   const [recipeIngredients, setRecipeIngredients] = useState([]);
+  const [addedToCart, setAddedToCart] = useState({});
   
 
   // Filtering and Sorting Logic using useMemo
@@ -330,6 +354,10 @@ function ShopMart() {
         return b.price - a.price;
       } else if (sortBy === 'rating') {
         return b.rating - a.rating;
+      } else if (sortBy === 'category') {
+        const catCompare = a.category.localeCompare(b.category);
+        if (catCompare !== 0) return catCompare;
+        return a.name.localeCompare(b.name);
       }
       return 0;
     });
@@ -337,22 +365,15 @@ function ShopMart() {
     return sortedProducts;
   }, [products, currentCategory, searchTerm, searchType, recipeIngredients, sortBy]);
 
-  /**
-   * Generate star rating display
-   * @param {number} rating - Rating value (0-5)
-   * @returns {string} HTML string of star symbols
-   */
+  // Replace generateStars with SVG version
   const generateStars = (rating) => {
     const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
-    let stars = '';
-
-    for (let i = 0; i < fullStars; i++) {
-      stars += '★';
-    }
-    if (hasHalfStar) {
-      stars += '☆';
-    }
+    const hasHalfStar = rating % 1 >= 0.25 && rating % 1 < 0.75;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    const stars = [];
+    for (let i = 0; i < fullStars; i++) stars.push(<FullStar key={`full-${i}`} />);
+    if (hasHalfStar) stars.push(<HalfStar key="half" />);
+    for (let i = 0; i < emptyStars; i++) stars.push(<EmptyStar key={`empty-${i}`} />);
     return stars;
   };
 
@@ -494,6 +515,12 @@ function ShopMart() {
     }
   };
 
+  // Add this function inside ShopMart:
+  const clearCart = () => {
+    setCart([]);
+    setIsCartOpen(false);
+  };
+
   return (
     <>
       {/* Header */}
@@ -572,15 +599,19 @@ function ShopMart() {
             <option value="price-low">Price (Low to High)</option>
             <option value="price-high">Price (High to Low)</option>
             <option value="rating">Rating</option>
+            <option value="category">Category</option>
           </select>
         </div>
         <div className="filter-group">
           <label>Products per page:</label>
           <select className="filter-select" value={productsPerPage} onChange={handleProductsPerPageChange}>
-            <option value="12">12</option>
-            <option value="24">24</option>
-            <option value="48">48</option>
-            <option value="96">96</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="25">25</option>
+            <option value="30">30</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
           </select>
         </div>
         <div className="pagination-top">
@@ -594,22 +625,58 @@ function ShopMart() {
       <div className="products-container">
         {currentProducts.length > 0 ? (
           <div className="products-grid">
-            {currentProducts.map(product => (
-              <div className="product-card" key={product.id} onClick={() => viewProduct(product.id)}>
-                <div className="product-image">{product.image}</div>
-                <div className="product-info">
-                  <h3 className="product-title">{product.name}</h3>
-                  <div className="product-price">${product.price.toFixed(2)}</div>
-                  <div className="product-rating">
-                    <span className="stars">{generateStars(product.rating)}</span>
-                    <span className="rating-text">{product.rating} ({product.reviews} reviews)</span>
+            {currentProducts.map(product => {
+              const added = !!addedToCart[product.id];
+              const handleAddToCart = (e) => {
+                e.stopPropagation();
+                addToCart(product.id);
+                setAddedToCart(prev => ({ ...prev, [product.id]: true }));
+                setTimeout(() => setAddedToCart(prev => ({ ...prev, [product.id]: false })), 1000);
+              };
+              return (
+                <div className="product-card" key={product.id} onClick={() => viewProduct(product.id)} tabIndex={0} role="button" aria-label={`View details for ${product.name}`}
+                  style={{ boxShadow: '0 2px 8px rgba(36,116,230,0.07)', transition: 'box-shadow 0.2s', cursor: 'pointer' }}
+                  onKeyPress={e => { if (e.key === 'Enter') viewProduct(product.id); }}
+                  >
+                  <div className="product-image" aria-hidden="true">{product.image}</div>
+                  <div className="product-info">
+                    <h3 className="product-title" style={{ fontWeight: 700, fontSize: '1.15rem', marginBottom: 8, minHeight: '2.5em', color: '#222' }}>{product.name}</h3>
+                    <hr className="divider" style={{ border: 'none', borderTop: '2px solid #E02B2B', margin: '8px 0 10px 0', width: '100%' }} />
+                    <div className="product-price" style={{ fontWeight: 600, fontSize: '1.08rem', color: '#003366', marginBottom: 8 }}>${product.price.toFixed(2)}</div>
+                    <div className="product-rating" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginBottom: 8, width: '100%' }}>
+                      <span className="stars" style={{ display: 'flex', alignItems: 'center', fontSize: 20, marginBottom: 2 }}>{generateStars(product.rating)}</span>
+                      <span style={{ display: 'flex', alignItems: 'center', marginLeft: 2, marginTop: 0 }} aria-label="rating and reviews">
+                        <span style={{ fontWeight: 600, fontSize: 14, color: '#003366', marginRight: 8 }}>{product.rating.toFixed(1)}</span>
+                        <span className="rating-text" style={{ fontSize: 13, color: '#888' }}>
+                          ({product.reviews.toLocaleString()} reviews)
+                        </span>
+                      </span>
+                    </div>
+                    <button
+                      className="add-to-cart"
+                      style={{
+                        width: '100%',
+                        marginTop: 'auto',
+                        fontWeight: 700,
+                        fontSize: '1rem',
+                        borderRadius: 6,
+                        background: added ? '#2ecc40' : '#003366',
+                        color: '#fff',
+                        border: 'none',
+                        padding: '10px 0',
+                        transition: 'background 0.2s, transform 0.18s cubic-bezier(0.4,1.2,0.6,1)',
+                        transform: added ? 'scale(1.08)' : 'scale(1)'
+                      }}
+                      onClick={handleAddToCart}
+                      aria-label={`Add ${product.name} to cart`}
+                      disabled={added}
+                    >
+                      {added ? 'Added to Cart!' : 'Add to Cart'}
+                    </button>
                   </div>
-                  <button className="add-to-cart" onClick={(e) => { e.stopPropagation(); addToCart(product.id); }}>
-                    Add to Cart
-                  </button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="no-results">
@@ -665,32 +732,53 @@ function ShopMart() {
       {isCartOpen && (
         <div className="cart-modal" style={{ display: isCartOpen ? 'flex' : 'none' }} onClick={(e) => { if (e.target.className === 'cart-modal') toggleCart(); }}>
           <div className="cart-content">
-            <div className="cart-header">
+            <div className="cart-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h2>Shopping Cart</h2>
-              <button className="close-cart" onClick={toggleCart}>×</button>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  style={{
+                    background: 'none',
+                    color: '#E02B2B',
+                    border: '1px solid #E02B2B',
+                    borderRadius: 5,
+                    padding: '6px 12px',
+                    fontSize: 14,
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    marginRight: 4,
+                    transition: 'background 0.2s, color 0.2s',
+                  }}
+                  onClick={clearCart}
+                >
+                  Clear Cart
+                </button>
+                <button className="close-cart" onClick={toggleCart}>×</button>
+              </div>
             </div>
             <div>
-              {cart.length === 0 ? (
-                <p>Your cart is empty</p>
-              ) : (
-                cart.map(item => (
-                  <div className="cart-item" key={item.id}>
-                    <div>{item.image}</div>
-                    <div className="cart-item-info">
-                      <div className="cart-item-title">{item.name}</div>
-                      <div className="cart-item-price">${item.price.toFixed(2)}</div>
+              <div style={{ maxHeight: 320, overflowY: 'auto', marginBottom: 12 }}>
+                {cart.length === 0 ? (
+                  <p>Your cart is empty</p>
+                ) : (
+                  cart.map(item => (
+                    <div className="cart-item" key={item.id}>
+                      <div>{item.image}</div>
+                      <div className="cart-item-info">
+                        <div className="cart-item-title">{item.name}</div>
+                        <div className="cart-item-price">${item.price.toFixed(2)}</div>
+                      </div>
+                      <div className="quantity-controls">
+                        <button className="qty-btn" onClick={() => updateQuantity(item.id, -1)}>-</button>
+                        <span>{item.quantity}</span>
+                        <button className="qty-btn" onClick={() => updateQuantity(item.id, 1)}>+</button>
+                      </div>
+                      <button className="qty-btn" onClick={() => removeFromCart(item.id)}>×</button>
                     </div>
-                    <div className="quantity-controls">
-                      <button className="qty-btn" onClick={() => updateQuantity(item.id, -1)}>-</button>
-                      <span>{item.quantity}</span>
-                      <button className="qty-btn" onClick={() => updateQuantity(item.id, 1)}>+</button>
-                    </div>
-                    <button className="qty-btn" onClick={() => removeFromCart(item.id)}>×</button>
-                  </div>
-                ))
-              )}
+                  ))
+                )}
+              </div>
             </div>
-            <div className="cart-total">
+            <div className="cart-total" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
               <div className="total-amount">Total: ${cart.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}</div>
               <button className="checkout-btn" onClick={checkout}>Proceed to Checkout</button>
             </div>

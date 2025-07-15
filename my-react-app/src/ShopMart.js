@@ -337,7 +337,7 @@ const standardizedProducts = [
   ], [standardizedProducts]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchType, setSearchType] = useState('recipe'); // 'recipe' or 'ingredient'
+  const [searchType, setSearchType] = useState('ingredient'); // 'ingredient' or 'recipe'
   const [sortBy, setSortBy] = useState('name');
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage, setProductsPerPage] = useState(25); // Default to 25 products per page for 5 columns
@@ -572,20 +572,20 @@ const standardizedProducts = [
           <div className="header-center">
             <div className="toggle-switch">
               <button
-                className={`toggle-option${searchType === 'recipe' ? ' selected' : ''}`}
-                onClick={() => setSearchType('recipe')}
-                type="button"
-                aria-pressed={searchType === 'recipe'}
-              >
-                👨‍🍳 Recipe
-              </button>
-              <button
                 className={`toggle-option${searchType === 'ingredient' ? ' selected' : ''}`}
                 onClick={() => setSearchType('ingredient')}
                 type="button"
                 aria-pressed={searchType === 'ingredient'}
               >
                 🛒 Ingredient
+              </button>
+              <button
+                className={`toggle-option${searchType === 'recipe' ? ' selected' : ''}`}
+                onClick={() => setSearchType('recipe')}
+                type="button"
+                aria-pressed={searchType === 'recipe'}
+              >
+                👨‍🍳 Recipe
               </button>
             </div>
             <div className="search-input-group">
@@ -854,6 +854,31 @@ const standardizedProducts = [
               </span>
             </div>
             <div style={{ fontSize: 15, color: '#888', marginBottom: 12 }}>Category: {selectedProduct.category}</div>
+            <button
+              className="add-to-cart"
+              style={{
+                width: '100%',
+                marginTop: 12,
+                fontWeight: 700,
+                fontSize: '1rem',
+                borderRadius: 6,
+                background: addedToCart[selectedProduct.id] ? '#2ecc40' : '#003366',
+                color: '#fff',
+                border: 'none',
+                padding: '10px 0',
+                transition: 'background 0.2s, transform 0.18s cubic-bezier(0.4,1.2,0.6,1)',
+                transform: addedToCart[selectedProduct.id] ? 'scale(1.08)' : 'scale(1)'
+              }}
+              onClick={() => {
+                addToCart(selectedProduct.id);
+                setAddedToCart(prev => ({ ...prev, [selectedProduct.id]: true }));
+                setTimeout(() => setAddedToCart(prev => ({ ...prev, [selectedProduct.id]: false })), 1000);
+              }}
+              aria-label={`Add ${selectedProduct.name} to cart`}
+              disabled={addedToCart[selectedProduct.id]}
+            >
+              {addedToCart[selectedProduct.id] ? 'Added to Cart!' : 'Add to Cart'}
+            </button>
           </div>
         </div>
       )}

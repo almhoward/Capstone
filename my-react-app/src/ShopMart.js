@@ -173,6 +173,7 @@ const standardizedProducts = [
     { id: 119, name: "Pork Chops", price: 8.99, category: "Meat", rating: 4.5, reviews: 1000, image: "🍖" },
     { id: 120, name: "Tofu", price: 3.49, category: "Meat", rating: 4.3, reviews: 900, image: "⬜" },
     { id: 121, name: "Eggs", price: 3.49, category: "Dairy", rating: 4.7, reviews: 2500, image: "🥚" },
+    
     { id: 123, name: "Ground Turkey", price: 6.49, category: "Meat", rating: 4.5, reviews: 1100, image: "🦃" },
     { id: 124, name: "Lamb Chops", price: 18.99, category: "Meat", rating: 4.6, reviews: 700, image: "🐑" },
     { id: 125, name: "Shrimp", price: 10.99, category: "Fish & Seafood", rating: 4.7, reviews: 1300, image: "🦐" },
@@ -212,6 +213,7 @@ const standardizedProducts = [
     { id: 159, name: "Swiss Cheese", price: 5.49, category: "Dairy", rating: 4.6, reviews: 1200, image: "🧀" },
     { id: 160, name: "Greek Yogurt", price: 3.99, category: "Dairy", rating: 4.8, reviews: 1700, image: "🍦" },
     { id: 161, name: "Heavy Cream", price: 3.99, category: "Dairy", rating: 4.7, reviews: 1100, image: "🥛" },
+    
     { id: 162, name: "Orange Juice", price: 3.49, category: "Beverages", rating: 4.6, reviews: 900, image: "🍊" },
     { id: 163, name: "Apple Juice", price: 3.29, category: "Beverages", rating: 4.5, reviews: 850, image: "🍎" },
     { id: 164, name: "Almond Milk", price: 3.19, category: "Beverages", rating: 4.7, reviews: 1000, image: "🥛" },
@@ -254,9 +256,9 @@ const standardizedProducts = [
     { id: 201, name: "Chili Oil", price: 6.99, category: "Condiments & Spices", rating: 4.6, reviews: 750, image: "🌶️" },
     { id: 202, name: "Almond Butter", price: 7.99, category: "Snacks", rating: 4.7, reviews: 1000, image: "🥜" },
     { id: 203, name: "Strawberry Jam", price: 3.49, category: "Snacks", rating: 4.5, reviews: 850, image: "🍓" },
-    { id: 204, name: "Ranch Dressing", price: 3.99, category: "Snacks", rating: 4.4, reviews: 900, image: "🥗" },
-    { id: 205, name: "Italian Dressing", price: 3.79, category: "Snacks", rating: 4.3, reviews: 800, image: "🥗" },
-    { id: 206, name: "Caesar Dressing", price: 4.29, category: "Snacks", rating: 4.5, reviews: 750, image: "🥗" },
+    { id: 204, name: "Ranch Dressing", price: 3.99, category: "Condiments & Spices", rating: 4.4, reviews: 900, image: "🥗" },
+    { id: 205, name: "Italian Dressing", price: 3.79, category: "Condiments & Spices", rating: 4.3, reviews: 800, image: "🥗" },
+    { id: 206, name: "Caesar Dressing", price: 4.29, category: "Condiments & Spices", rating: 4.5, reviews: 750, image: "🥗" },
     { id: 207, name: "Agave Nectar", price: 5.49, category: "Condiments & Spices", rating: 4.6, reviews: 600, image: "🍯" },
     { id: 208, name: "Sweet Relish", price: 2.19, category: "Condiments & Spices", rating: 4.3, reviews: 400, image: "🥒" },
     { id: 209, name: "Taco Seasoning", price: 1.99, category: "Condiments & Spices", rating: 4.7, reviews: 1100, image: "🌮" },

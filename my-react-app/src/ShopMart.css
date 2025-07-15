@@ -171,7 +171,9 @@ body {
   border-radius: 999px;
   transition: background 0.18s, color 0.18s, font-weight 0.18s;
   z-index: 1;
-  min-width: 110px;
+  min-width: 130px;
+  max-width: 130px;
+  width: 130px;
   white-space: nowrap;
   overflow: visible;
   color: #666666;
@@ -266,9 +268,9 @@ body {
   margin-left: 12px;
 }
 .search-btn:hover {
-  background: #2474E6;
+  background: #E02B2B;
   color: #fff;
-  box-shadow: 0 4px 12px rgba(36,116,230,0.13);
+  box-shadow: 0 4px 12px rgba(224,43,43,0.13);
 }
 
 .return-all-btn {
@@ -288,7 +290,7 @@ body {
 }
 
 .return-all-btn:hover {
-  background: #2474E6;
+  background: #E02B2B;
   color: #fff;
 }
 
@@ -311,7 +313,7 @@ body {
   outline: none;
 }
 .cart-icon:hover {
-  background: #2474E6;
+  background: #E02B2B;
   color: #fff;
 }
 .cart-count {

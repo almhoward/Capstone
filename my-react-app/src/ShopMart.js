@@ -351,6 +351,23 @@ const standardizedProducts = [
   const [showThankYou, setShowThankYou] = useState(false);
   const [lastTotal, setLastTotal] = useState(0);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerWidth <= 600) {
+        setShowScrollTop(window.scrollY > 120);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleScrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Filtering and Sorting Logic using useMemo
   const filteredProducts = React.useMemo(() => {
@@ -627,6 +644,16 @@ const standardizedProducts = [
             <button className="cart-icon" onClick={toggleCart}>
               🛒<span className="cart-count">{cart.reduce((sum, item) => sum + item.quantity, 0)}</span>
             </button>
+            {/* Scroll-to-Top Button (bottom left on mobile) */}
+            {showScrollTop && (
+              <button
+                className="scroll-top-btn"
+                onClick={handleScrollToTop}
+                aria-label="Scroll to top"
+              >
+                ⬆︎
+              </button>
+            )}
           </div>
         </div>
       </header>

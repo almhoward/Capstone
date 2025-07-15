@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import './ShopMart.css';
 
 function ShopMart() {
   // Sample product data
-  const products = [
+  const products = useMemo(() => [
     // The Bare Minimum
     { id: 1, name: "Salt", price: 2.99, category: "spices & seasonings", rating: 4.8, reviews: 5000, image: "🧂" },
     { id: 2, name: "Pepper", price: 3.19, category: "spices & seasonings", rating: 4.7, reviews: 4500, image: "🌶️" },
@@ -270,7 +270,7 @@ function ShopMart() {
     { id: 112, name: "Dried Fruits", price: 3.49, category: "dried fruits & nuts", rating: 4.5, reviews: 700, image: "🍇" },
     { id: 113, name: "Nuts", price: 3.99, category: "dried fruits & nuts", rating: 4.6, reviews: 800, image: "🌰" },
     { id: 114, name: "Seeds", price: 6.99, category: "dried fruits & nuts", rating: 4.8, reviews: 900, image: "🌱" }
-  ];
+  ], []);
 
   // State variables
   const [cart, setCart] = useState([]);
@@ -287,7 +287,7 @@ function ShopMart() {
   const [productsPerPage, setProductsPerPage] = useState(24); // Default to 24 products per page
   
   const [recipeIngredients, setRecipeIngredients] = useState([]);
-  const [searchedRecipeName, setSearchedRecipeName] = useState('');
+  
 
   // Filtering and Sorting Logic using useMemo
   const filteredProducts = React.useMemo(() => {
@@ -393,7 +393,7 @@ function ShopMart() {
         const data = await response.json();
 
         if (data.ingredients) {
-          setSearchedRecipeName(data.best_match);
+          
           const sortedNewIngredients = [...data.ingredients].sort();
           const sortedCurrentIngredients = [...recipeIngredients].sort();
 
@@ -500,35 +500,48 @@ function ShopMart() {
       <header className="header">
         <div className="header-container">
           <div className="header-left">
-            <div className="logo">CrossMart</div>
+            <div className="logo">
+              <img src="/crossmark-logo.png" alt="Crossmark Logo" style={{ height: '1.6rem', objectFit: 'contain' }} />
+            </div>
           </div>
 
           <div className="header-center">
-            <div className="search-switch-container">
-              <span className={`switch-label ${searchType === 'recipe' ? 'active' : ''}`}>👨‍🍳 Recipe</span>
-              <label className="switch">
-                <input 
-                  type="checkbox" 
-                  checked={searchType === 'ingredient'}
-                  onChange={() => setSearchType(searchType === 'recipe' ? 'ingredient' : 'recipe')} 
-                />
-                <span className="slider round"></span>
-              </label>
-              <span className={`switch-label ${searchType === 'ingredient' ? 'active' : ''}`}>🛒 Ingredient</span>
+            <div className="toggle-switch">
+              <button
+                className={`toggle-option${searchType === 'recipe' ? ' selected' : ''}`}
+                onClick={() => setSearchType('recipe')}
+                type="button"
+                aria-pressed={searchType === 'recipe'}
+              >
+                👨‍🍳 Recipe
+              </button>
+              <button
+                className={`toggle-option${searchType === 'ingredient' ? ' selected' : ''}`}
+                onClick={() => setSearchType('ingredient')}
+                type="button"
+                aria-pressed={searchType === 'ingredient'}
+              >
+                🛒 Ingredient
+              </button>
             </div>
-            <div className="search-container">
+            <div className="search-input-group">
               <input
                 type="text"
                 className="search-input"
-                placeholder={`Search for ${searchType}s`}
+                placeholder={`Search for ${searchType === 'recipe' ? 'recipes' : 'products'}...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyPress={(e) => { if (e.key === 'Enter') handleSearch(); }}
               />
-              <button className="search-btn" onClick={handleSearch}>
-                Search
-              </button>
+              {searchTerm && (
+                <button className="clear-search-btn" onClick={() => setSearchTerm('')}>
+                  &times;
+                </button>
+              )}
             </div>
+            <button className="search-btn" onClick={handleSearch}>
+              Search
+            </button>
             <button className="return-all-btn" onClick={() => handleCategoryFilter('all')}>🗑️</button>
           </div>
 

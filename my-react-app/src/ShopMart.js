@@ -575,7 +575,13 @@ const standardizedProducts = [
             <div className="toggle-switch">
               <button
                 className={`toggle-option${searchType === 'ingredient' ? ' selected' : ''}`}
-                onClick={() => setSearchType('ingredient')}
+                onClick={() => {
+                  setSearchType('ingredient');
+                  setCurrentCategory('all');
+                  setSearchTerm('');
+                  setRecipeIngredients([]);
+                  setCurrentPage(1);
+                }}
                 type="button"
                 aria-pressed={searchType === 'ingredient'}
               >
@@ -583,7 +589,13 @@ const standardizedProducts = [
               </button>
               <button
                 className={`toggle-option${searchType === 'recipe' ? ' selected' : ''}`}
-                onClick={() => setSearchType('recipe')}
+                onClick={() => {
+                  setSearchType('recipe');
+                  setCurrentCategory('all');
+                  setSearchTerm('');
+                  setRecipeIngredients([]);
+                  setCurrentPage(1);
+                }}
                 type="button"
                 aria-pressed={searchType === 'recipe'}
               >
@@ -679,7 +691,7 @@ const standardizedProducts = [
                   >
                   <div className="product-image" aria-hidden="true">{product.image}</div>
                   <div className="product-info">
-                    <h3 className="product-title" style={{ fontWeight: 700, fontSize: '1.15rem', marginBottom: 8, minHeight: '2.5em', color: '#222' }}>{product.name}</h3>
+                    <h3 className="product-title">{product.name}</h3>
                     <hr className="divider" style={{ border: 'none', borderTop: '2px solid #E02B2B', margin: '8px 0 10px 0', width: '100%' }} />
                     <div className="product-price" style={{ fontWeight: 600, fontSize: '1.08rem', color: '#003366', marginBottom: 8 }}>${product.price.toFixed(2)}</div>
                     <div className="product-rating" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginBottom: 8, width: '100%' }}>
@@ -770,7 +782,14 @@ const standardizedProducts = [
       {/* Cart Modal */}
       {isCartOpen && (
         <div className="cart-modal" style={{ display: isCartOpen ? 'flex' : 'none' }} onClick={(e) => { if (e.target.className === 'cart-modal') toggleCart(); }}>
-          <div className="cart-content">
+          <div
+            className="cart-content"
+            style={
+              window.innerWidth <= 600
+                ? {} // On mobile, use only CSS for sizing/positioning
+                : {}
+            }
+          >
             <div className="cart-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h2>Shopping Cart</h2>
               <div style={{ display: 'flex', gap: 8 }}>

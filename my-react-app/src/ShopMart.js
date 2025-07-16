@@ -172,7 +172,6 @@ const standardizedProducts = [
     { id: 118, name: "Salmon Fillet", price: 15.99, category: "Fish & Seafood", rating: 4.8, reviews: 1500, image: "🐟" },
     { id: 119, name: "Pork Chops", price: 8.99, category: "Meat", rating: 4.5, reviews: 1000, image: "🍖" },
     { id: 120, name: "Tofu", price: 3.49, category: "Meat", rating: 4.3, reviews: 900, image: "⬜" },
-    { id: 121, name: "Eggs", price: 3.49, category: "Dairy", rating: 4.7, reviews: 2500, image: "🥚" },
     
     { id: 123, name: "Ground Turkey", price: 6.49, category: "Meat", rating: 4.5, reviews: 1100, image: "🦃" },
     { id: 124, name: "Lamb Chops", price: 18.99, category: "Meat", rating: 4.6, reviews: 700, image: "🐑" },
@@ -328,6 +327,141 @@ const standardizedProducts = [
     { id: 114, name: "Seeds", price: 6.99, category: "Snacks", rating: 4.8, reviews: 900, image: "🌱" }
   ];
 
+  // Canonical ingredient mapping for grouping similar products
+  const canonicalIngredientMap = {
+    tomato: [
+      'Fresh Tomatoes',
+      'Canned Diced Tomatoes',
+      'Sun-Dried Tomatoes',
+      'Tomato Sauce',
+      'Tomato Paste',
+      'Marinara Sauce',
+      'Ketchup',
+    ],
+    cheese: [
+      'Cheddar Cheese',
+      'Mozzarella Cheese',
+      'Feta Cheese',
+      'Swiss Cheese',
+      'Parmesan Cheese',
+      'Cream Cheese',
+      'Other Cheese',
+    ],
+    vinegar: [
+      'Vinegar',
+      'Red Wine Vinegar',
+      'Apple Cider Vinegar',
+      'Balsamic Vinegar',
+      'Rice Vinegar',
+    ],
+    oil: [
+      'Olive Oil',
+      'Vegetable Oil',
+      'Coconut Oil',
+      'Sesame Oil',
+      'Grapeseed Oil',
+      'Avocado Oil',
+      'Chili Oil',
+    ],
+    'leafy greens': [
+      'Spinach',
+      'Romaine Lettuce',
+      'Green Leaf Lettuce',
+      'Kale',
+      'Frozen Spinach',
+    ],
+    milk: [
+      'Milk',
+      'Almond Milk',
+      'Soy Milk',
+      'Oat Milk',
+    ],
+    lettuce: [
+      'Romaine Lettuce',
+      'Green Leaf Lettuce',
+      'Spinach',
+      'Kale',
+      'Frozen Spinach',
+    ],
+    pepper: [
+      'Bell Peppers',
+      'Fresh Bell Peppers',
+      'Canned Green Chiles',
+      'Cayenne Pepper',
+      'Crushed Red Pepper Flakes',
+      'Chili Powder',
+      'Paprika',
+      'Smoked Paprika',
+    ],
+    onion: [
+      'Onions',
+      'Shallots',
+      'Onion Powder',
+    ],
+    garlic: [
+      'Garlic',
+      'Garlic Powder',
+    ],
+    beans: [
+      'Canned White Beans',
+      'Canned Black Beans',
+      'Canned Kidney Beans',
+      'Canned Garbanzo Beans',
+      'Dried Black Beans',
+      'Dried Lentils',
+      'Dried Chickpeas',
+      'Lentils',
+      'Split Peas',
+    ],
+    bread: [
+      'Bread/Rolls',
+      'Bread Flour',
+      'Cake Flour',
+      'Whole Wheat Flour',
+      'All-Purpose Flour',
+      'Gluten-Free Flour Blend',
+    ],
+    sugar: [
+      'Granulated Sugar',
+      'Brown Sugar',
+      'Confectioner\'s Sugar',
+      'Maple Syrup',
+      'Honey',
+      'Agave Nectar',
+      'Molasses',
+      'Corn Syrup',
+    ],
+    flour: [
+      'All-Purpose Flour',
+      'Bread Flour',
+      'Cake Flour',
+      'Whole Wheat Flour',
+      'Gluten-Free Flour Blend',
+    ],
+    pasta: [
+      'Pasta',
+      'Spaghetti',
+      'Penne',
+      'Farfalle',
+      'Lasagna Noodles',
+    ],
+    chocolate: [
+      'Chocolate Chips',
+      'White Chocolate Chips',
+      'Peanut Butter Chips',
+    ],
+    broth: [
+      'Chicken Stock',
+      'Beef Stock',
+      'Vegetable Broth',
+    ],
+    'deli meats': [
+      'Sliced Turkey',
+      'Sliced Ham',
+      'Salami',
+    ],
+  };
+
   function ShopMart() {
   
   // State variables
@@ -352,6 +486,8 @@ const standardizedProducts = [
   const [lastTotal, setLastTotal] = useState(0);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  // Enhanced recipe ingredient filtering with canonical mapping and expansion support
+  const [expandedIngredients, setExpandedIngredients] = useState({});
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -391,13 +527,30 @@ const standardizedProducts = [
       );
     }
 
-    // Recipe ingredients filtering
+    // Recipe ingredients filtering with canonical mapping
     if (recipeIngredients.length > 0) {
-      const ingredientNames = recipeIngredients.map(ing => ing.toLowerCase().trim());
-      newFilteredProducts = newFilteredProducts.filter(product => {
-        const productNameLower = product.name.toLowerCase().trim();
-        return ingredientNames.some(ingredient => productNameLower.includes(ingredient) || ingredient.includes(productNameLower));
+      let matchedProducts = [];
+      recipeIngredients.forEach(ingredient => {
+        const ingredientKey = ingredient.toLowerCase().replace(/s$/, ''); // crude singularization
+        if (canonicalIngredientMap[ingredientKey]) {
+          // If expanded, show all; else, show only preferred
+          const showAll = expandedIngredients[ingredientKey];
+          const productNames = showAll ? canonicalIngredientMap[ingredientKey] : [canonicalIngredientMap[ingredientKey][0]];
+          productNames.forEach(name => {
+            const product = standardizedProducts.find(p => p.name.toLowerCase() === name.toLowerCase());
+            if (product) matchedProducts.push(product);
+          });
+        } else {
+          // fallback to old logic for unmapped ingredients
+          matchedProducts = matchedProducts.concat(
+            standardizedProducts.filter(product =>
+              product.name.toLowerCase().includes(ingredient.toLowerCase()) || ingredient.toLowerCase().includes(product.name.toLowerCase())
+            )
+          );
+        }
       });
+      // Remove duplicates
+      newFilteredProducts = Array.from(new Set(matchedProducts));
     }
 
     // Sorting
@@ -419,7 +572,7 @@ const standardizedProducts = [
     });
 
     return sortedProducts;
-  }, [standardizedProducts, currentCategory, searchTerm, searchType, recipeIngredients, sortBy]);
+  }, [standardizedProducts, currentCategory, searchTerm, searchType, recipeIngredients, sortBy, expandedIngredients]);
 
   // Replace generateStars with SVG version
   const generateStars = (rating) => {
@@ -703,58 +856,158 @@ const standardizedProducts = [
       <div className="products-container">
         {currentProducts.length > 0 ? (
           <div className="products-grid">
-            {currentProducts.map(product => {
-              const added = !!addedToCart[product.id];
-              const handleAddToCart = (e) => {
-                e.stopPropagation();
-                addToCart(product.id);
-                setAddedToCart(prev => ({ ...prev, [product.id]: true }));
-                setTimeout(() => setAddedToCart(prev => ({ ...prev, [product.id]: false })), 1000);
-              };
-              return (
-                <div className="product-card" key={product.id} onClick={() => setSelectedProduct(product)} tabIndex={0} role="button" aria-label={`View details for ${product.name}`}
-                  style={{ boxShadow: '0 2px 8px rgba(36,116,230,0.07)', transition: 'box-shadow 0.2s', cursor: 'pointer' }}
-                  onKeyPress={e => { if (e.key === 'Enter') setSelectedProduct(product); }}
+            {/* If recipeIngredients are active, group by canonical ingredient */}
+            {recipeIngredients.length > 0 ? (
+              (() => {
+                const productCards = [];
+                const renderedProductIds = new Set();
+
+                recipeIngredients.forEach(ingredient => {
+                  const ingredientKey = ingredient.toLowerCase().replace(/s$/, '');
+                  const isCanonical = !!canonicalIngredientMap[ingredientKey];
+                  let products = [];
+
+                  if (isCanonical) {
+                    const showAll = expandedIngredients[ingredientKey];
+                    const productNames = showAll ? canonicalIngredientMap[ingredientKey] : [canonicalIngredientMap[ingredientKey][0]];
+                    products = productNames.map(name => standardizedProducts.find(p => p.name.toLowerCase() === name.toLowerCase())).filter(Boolean);
+                  } else {
+                    products = standardizedProducts.filter(p =>
+                      p.name.toLowerCase().includes(ingredient.toLowerCase()) || ingredient.toLowerCase().includes(p.name.toLowerCase())
+                    );
+                  }
+                  
+                  products = products.filter(p => !renderedProductIds.has(p.id));
+
+                  if (products.length > 0) {
+                    products.forEach((product, idx) => {
+                      renderedProductIds.add(product.id);
+                      productCards.push(
+                        <div className="product-card" key={product.id} onClick={() => setSelectedProduct(product)} tabIndex={0} role="button" aria-label={`View details for ${product.name}`}
+                          onKeyPress={e => { if (e.key === 'Enter') setSelectedProduct(product); }}
+                        >
+                          <div className="product-image" aria-hidden="true">{product.image}</div>
+                          <div className="product-info" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
+                            <h3 className="product-title">{product.name}</h3>
+                            <div style={{ height: 28, display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2, width: '100%' }}>
+                              {idx === 0 && isCanonical && canonicalIngredientMap[ingredientKey].length > 1 && (
+                                <>
+                                  <span style={{ fontWeight: 600, fontSize: 15 }}>{ingredient.charAt(0).toUpperCase() + ingredient.slice(1)}</span>
+                                  <button
+                                    className="expand-btn"
+                                    style={{ fontSize: 13, color: '#2474E6', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+                                    onClick={e => { e.stopPropagation(); setExpandedIngredients(prev => ({ ...prev, [ingredientKey]: !prev[ingredientKey] })); }}
+                                  >
+                                    {expandedIngredients[ingredientKey] ? 'Show less' : `Show all ${canonicalIngredientMap[ingredientKey].length} options`}
+                                  </button>
+                                </>
+                              )}
+                              {(idx !== 0 || !isCanonical || canonicalIngredientMap[ingredientKey].length <= 1) && (
+                                <div style={{ height: 28 }}></div>
+                              )}
+                            </div>
+                            <hr className="divider" style={{ border: 'none', borderTop: '2px solid #E02B2B', margin: '8px 0 10px 0', width: '100%' }} />
+                            <div className="product-price" style={{ fontWeight: 600, fontSize: '1.08rem', color: '#003366', marginBottom: 8, textAlign: 'left', width: '100%' }}>${product.price.toFixed(2)}</div>
+                            <div className="product-rating" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginBottom: 8, width: '100%' }}>
+                              <span className="stars" style={{ display: 'flex', alignItems: 'center', fontSize: 20, marginBottom: 2 }}>{generateStars(product.rating)}</span>
+                              <span style={{ display: 'flex', alignItems: 'center', marginLeft: 2, marginTop: 0 }} aria-label="rating and reviews">
+                                <span style={{ fontWeight: 600, fontSize: 14, color: '#003366', marginRight: 8 }}>{product.rating.toFixed(1)}</span>
+                                <span className="rating-text" style={{ fontSize: 13, color: '#888' }}>
+                                  ({product.reviews.toLocaleString()} reviews)
+                                </span>
+                              </span>
+                            </div>
+                            <button
+                              className="add-to-cart"
+                              style={{
+                                width: '100%',
+                                marginTop: 'auto',
+                                fontWeight: 700,
+                                fontSize: '1rem',
+                                borderRadius: 6,
+                                background: addedToCart[product.id] ? '#2ecc40' : '#003366',
+                                color: '#fff',
+                                border: 'none',
+                                padding: '10px 0',
+                                transition: 'background 0.2s, transform 0.18s cubic-bezier(0.4,1.2,0.6,1)',
+                                transform: addedToCart[product.id] ? 'scale(1.08)' : 'scale(1)'
+                              }}
+                              onClick={e => {
+                                e.stopPropagation();
+                                addToCart(product.id);
+                                setAddedToCart(prev => ({ ...prev, [product.id]: true }));
+                                setTimeout(() => setAddedToCart(prev => ({ ...prev, [product.id]: false })), 1000);
+                              }}
+                              aria-label={`Add ${product.name} to cart`}
+                              disabled={addedToCart[product.id]}
+                            >
+                              {addedToCart[product.id] ? 'Added to Cart!' : 'Add to Cart'}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    });
+                  }
+                });
+                return productCards;
+              })()
+            ) : (
+              // Default rendering if not in recipe search mode
+              currentProducts.map(product => {
+                const added = !!addedToCart[product.id];
+                const handleAddToCart = (e) => {
+                  e.stopPropagation();
+                  addToCart(product.id);
+                  setAddedToCart(prev => ({ ...prev, [product.id]: true }));
+                  setTimeout(() => setAddedToCart(prev => ({ ...prev, [product.id]: false })), 1000);
+                };
+                return (
+                  <div className="product-card" key={product.id} onClick={() => setSelectedProduct(product)} tabIndex={0} role="button" aria-label={`View details for ${product.name}`}
+                    onKeyPress={e => { if (e.key === 'Enter') setSelectedProduct(product); }}
                   >
-                  <div className="product-image" aria-hidden="true">{product.image}</div>
-                  <div className="product-info">
-                    <h3 className="product-title">{product.name}</h3>
-                    <hr className="divider" style={{ border: 'none', borderTop: '2px solid #E02B2B', margin: '8px 0 10px 0', width: '100%' }} />
-                    <div className="product-price" style={{ fontWeight: 600, fontSize: '1.08rem', color: '#003366', marginBottom: 8 }}>${product.price.toFixed(2)}</div>
-                    <div className="product-rating" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginBottom: 8, width: '100%' }}>
-                      <span className="stars" style={{ display: 'flex', alignItems: 'center', fontSize: 20, marginBottom: 2 }}>{generateStars(product.rating)}</span>
-                      <span style={{ display: 'flex', alignItems: 'center', marginLeft: 2, marginTop: 0 }} aria-label="rating and reviews">
-                        <span style={{ fontWeight: 600, fontSize: 14, color: '#003366', marginRight: 8 }}>{product.rating.toFixed(1)}</span>
-                        <span className="rating-text" style={{ fontSize: 13, color: '#888' }}>
-                          ({product.reviews.toLocaleString()} reviews)
+                    <div className="product-image" aria-hidden="true">{product.image}</div>
+                    <div className="product-info" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
+                      <h3 className="product-title">{product.name}</h3>
+                      <div style={{ height: 28, display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2, width: '100%' }}>
+                        {/* This space is intentionally left blank to align with the recipe search results */}
+                      </div>
+                      <hr className="divider" style={{ border: 'none', borderTop: '2px solid #E02B2B', margin: '8px 0 10px 0', width: '100%' }} />
+                      <div className="product-price" style={{ fontWeight: 600, fontSize: '1.08rem', color: '#003366', marginBottom: 8, textAlign: 'left', width: '100%' }}>${product.price.toFixed(2)}</div>
+                      <div className="product-rating" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginBottom: 8, width: '100%' }}>
+                        <span className="stars" style={{ display: 'flex', alignItems: 'center', fontSize: 20, marginBottom: 2 }}>{generateStars(product.rating)}</span>
+                        <span style={{ display: 'flex', alignItems: 'center', marginLeft: 2, marginTop: 0 }} aria-label="rating and reviews">
+                          <span style={{ fontWeight: 600, fontSize: 14, color: '#003366', marginRight: 8 }}>{product.rating.toFixed(1)}</span>
+                          <span className="rating-text" style={{ fontSize: 13, color: '#888' }}>
+                            ({product.reviews.toLocaleString()} reviews)
+                          </span>
                         </span>
-                      </span>
+                      </div>
+                      <button
+                        className="add-to-cart"
+                        style={{
+                          width: '100%',
+                          marginTop: 'auto',
+                          fontWeight: 700,
+                          fontSize: '1rem',
+                          borderRadius: 6,
+                          background: added ? '#2ecc40' : '#003366',
+                          color: '#fff',
+                          border: 'none',
+                          padding: '10px 0',
+                          transition: 'background 0.2s, transform 0.18s cubic-bezier(0.4,1.2,0.6,1)',
+                          transform: added ? 'scale(1.08)' : 'scale(1)'
+                        }}
+                        onClick={handleAddToCart}
+                        aria-label={`Add ${product.name} to cart`}
+                        disabled={added}
+                      >
+                        {added ? 'Added to Cart!' : 'Add to Cart'}
+                      </button>
                     </div>
-                    <button
-                      className="add-to-cart"
-                      style={{
-                        width: '100%',
-                        marginTop: 'auto',
-                        fontWeight: 700,
-                        fontSize: '1rem',
-                        borderRadius: 6,
-                        background: added ? '#2ecc40' : '#003366',
-                        color: '#fff',
-                        border: 'none',
-                        padding: '10px 0',
-                        transition: 'background 0.2s, transform 0.18s cubic-bezier(0.4,1.2,0.6,1)',
-                        transform: added ? 'scale(1.08)' : 'scale(1)'
-                      }}
-                      onClick={handleAddToCart}
-                      aria-label={`Add ${product.name} to cart`}
-                      disabled={added}
-                    >
-                      {added ? 'Added to Cart!' : 'Add to Cart'}
-                    </button>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         ) : (
           <div className="no-results">

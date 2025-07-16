@@ -103,9 +103,6 @@ const standardizedProducts = [
     { id: 36, name: "Sweet Potatoes", price: 3.59, category: "Vegetables", rating: 4.7, reviews: 850, image: "🍠" },
     { id: 37, name: "Carrots", price: 1.99, category: "Vegetables", rating: 4.6, reviews: 1000, image: "🥕" },
     { id: 38, name: "Celery", price: 2.29, category: "Vegetables", rating: 4.4, reviews: 600, image: "🥬" },
-    { id: 115, name: "Bell Peppers", price: 2.50, category: "Vegetables", rating: 4.6, reviews: 800, image: "🫑" },
-    { id: 116, name: "Zucchini", price: 1.79, category: "Vegetables", rating: 4.3, reviews: 500, image: "🥒" },
-    { id: 117, name: "Cucumbers", price: 1.29, category: "Vegetables", rating: 4.5, reviews: 600, image: "🥒" },
 
     // Condiments
     { id: 39, name: "Vinegar", price: 5.99, category: "Condiments & Spices", rating: 4.7, reviews: 1500, image: "🍾" },
@@ -137,10 +134,10 @@ const standardizedProducts = [
     { id: 63, name: "Smoked Paprika", price: 3.49, category: "Condiments & Spices", rating: 4.6, reviews: 550, image: "🌶️" },
     { id: 64, name: "Dried Parsley", price: 1.99, category: "Condiments & Spices", rating: 4.3, reviews: 450, image: "🌿" },
     { id: 65, name: "Nutmeg", price: 4.29, category: "Condiments & Spices", rating: 4.7, reviews: 700, image: "🌰" },
-    { id: 66, name: "Ginger", price: 3.59, category: "Condiments & Spices", rating: 4.6, reviews: 800, image: "🫚" },
-    { id: 67, name: "Thyme", price: 2.19, category: "Condiments & Spices", rating: 4.5, reviews: 600, image: "🌿" },
-    { id: 68, name: "Rosemary", price: 2.49, category: "Condiments & Spices", rating: 4.4, reviews: 550, image: "🌿" },
-    { id: 69, name: "Dill", price: 2.19, category: "Condiments & Spices", rating: 4.3, reviews: 500, image: "🌿" },
+    { id: 66, name: "Dried Ginger", price: 3.59, category: "Condiments & Spices", rating: 4.6, reviews: 800, image: "🫚" },
+    { id: 67, name: "Dried Thyme", price: 2.19, category: "Condiments & Spices", rating: 4.5, reviews: 600, image: "🌿" },
+    { id: 68, name: "Dried Rosemary", price: 2.49, category: "Condiments & Spices", rating: 4.4, reviews: 550, image: "🌿" },
+    { id: 69, name: "Dried Dill", price: 2.19, category: "Condiments & Spices", rating: 4.3, reviews: 500, image: "🌿" },
     { id: 70, name: "Italian Seasoning", price: 2.99, category: "Condiments & Spices", rating: 4.7, reviews: 900, image: "🌿" },
     { id: 71, name: "Turmeric", price: 3.89, category: "Condiments & Spices", rating: 4.6, reviews: 750, image: "🟠" },
     { id: 72, name: "Black Peppercorns", price: 5.99, category: "Condiments & Spices", rating: 4.8, reviews: 1000, image: "⚫" },
@@ -393,15 +390,6 @@ const standardizedProducts = [
       'Paprika',
       'Smoked Paprika',
     ],
-    onion: [
-      'Onions',
-      'Shallots',
-      'Onion Powder',
-    ],
-    garlic: [
-      'Garlic',
-      'Garlic Powder',
-    ],
     beans: [
       'Canned White Beans',
       'Canned Black Beans',
@@ -459,6 +447,23 @@ const standardizedProducts = [
       'Sliced Turkey',
       'Sliced Ham',
       'Salami',
+    ],
+    chicken: [
+      'Chicken Breasts',
+      'Chicken Thighs',
+      'Chicken Wings',
+      'Whole Chicken',
+    ],
+    beef: [
+      'Ground Beef',
+      'Beef Steaks',
+      'Beef Roasts',
+    ],
+    pork: [
+      'Pork Chops',
+      'Pork Loin',
+      'Bacon',
+      'Sausage',
     ],
   };
 

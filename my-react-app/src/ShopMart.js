@@ -433,6 +433,24 @@ const standardizedProducts = [
       'Farfalle',
       'Lasagna Noodles',
     ],
+    // New canonical groups for noodles and lasagna
+    noodle: [
+      'Pasta',
+      'Spaghetti',
+      'Penne',
+      'Farfalle',
+      // intentionally NOT including 'Lasagna Noodles'
+    ],
+    noodles: [
+      'Pasta',
+      'Spaghetti',
+      'Penne',
+      'Farfalle',
+      // intentionally NOT including 'Lasagna Noodles'
+    ],
+    lasagna: [
+      'Lasagna Noodles'
+    ],
     chocolate: [
       'Chocolate Chips',
       'White Chocolate Chips',
@@ -536,22 +554,31 @@ const standardizedProducts = [
     if (recipeIngredients.length > 0) {
       let matchedProducts = [];
       recipeIngredients.forEach(ingredient => {
-        const ingredientKey = ingredient.toLowerCase().replace(/s$/, ''); // crude singularization
-        if (canonicalIngredientMap[ingredientKey]) {
-          // If expanded, show all; else, show only preferred
+        // Enhanced ingredient key logic for noodles/lasagna
+        let ingredientKey = ingredient.toLowerCase().replace(/s$/, '');
+        if (ingredientKey.includes('lasagna')) {
+          ingredientKey = 'lasagna';
+        } else if (ingredientKey.includes('noodle')) {
+          ingredientKey = 'noodle';
+        }
+        const isCanonical = !!canonicalIngredientMap[ingredientKey];
+        let products = [];
+        if (isCanonical) {
           const showAll = expandedIngredients[ingredientKey];
           const productNames = showAll ? canonicalIngredientMap[ingredientKey] : [canonicalIngredientMap[ingredientKey][0]];
-          productNames.forEach(name => {
-            const product = standardizedProducts.find(p => p.name.toLowerCase() === name.toLowerCase());
-            if (product) matchedProducts.push(product);
-          });
+          products = productNames.map(name => standardizedProducts.find(p => p.name.toLowerCase() === name.toLowerCase())).filter(Boolean);
         } else {
-          // fallback to old logic for unmapped ingredients
-          matchedProducts = matchedProducts.concat(
-            standardizedProducts.filter(product =>
-              product.name.toLowerCase().includes(ingredient.toLowerCase()) || ingredient.toLowerCase().includes(product.name.toLowerCase())
-            )
+          products = standardizedProducts.filter(p =>
+            p.name.toLowerCase().includes(ingredient.toLowerCase()) || ingredient.toLowerCase().includes(p.name.toLowerCase())
           );
+        }
+        
+        products = products.filter(p => !matchedProducts.some(mp => mp.id === p.id));
+
+        if (products.length > 0) {
+          products.forEach((product, idx) => {
+            matchedProducts.push(product);
+          });
         }
       });
       // Remove duplicates
@@ -868,10 +895,15 @@ const standardizedProducts = [
                 const renderedProductIds = new Set();
 
                 recipeIngredients.forEach(ingredient => {
-                  const ingredientKey = ingredient.toLowerCase().replace(/s$/, '');
+                  // Enhanced ingredient key logic for noodles/lasagna
+                  let ingredientKey = ingredient.toLowerCase().replace(/s$/, '');
+                  if (ingredientKey.includes('lasagna')) {
+                    ingredientKey = 'lasagna';
+                  } else if (ingredientKey.includes('noodle')) {
+                    ingredientKey = 'noodle';
+                  }
                   const isCanonical = !!canonicalIngredientMap[ingredientKey];
                   let products = [];
-
                   if (isCanonical) {
                     const showAll = expandedIngredients[ingredientKey];
                     const productNames = showAll ? canonicalIngredientMap[ingredientKey] : [canonicalIngredientMap[ingredientKey][0]];

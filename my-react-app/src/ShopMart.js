@@ -208,8 +208,6 @@ const standardizedProducts = [
     { id: 158, name: "Feta Cheese", price: 4.49, category: "Dairy", rating: 4.5, reviews: 1000, image: "🧀" },
     { id: 159, name: "Swiss Cheese", price: 5.49, category: "Dairy", rating: 4.6, reviews: 1200, image: "🧀" },
     { id: 160, name: "Greek Yogurt", price: 3.99, category: "Dairy", rating: 4.8, reviews: 1700, image: "🍦" },
-    { id: 161, name: "Heavy Cream", price: 3.99, category: "Dairy", rating: 4.7, reviews: 1100, image: "🥛" },
-    
     { id: 162, name: "Orange Juice", price: 3.49, category: "Beverages", rating: 4.6, reviews: 900, image: "🍊" },
     { id: 163, name: "Apple Juice", price: 3.29, category: "Beverages", rating: 4.5, reviews: 850, image: "🍎" },
     { id: 164, name: "Almond Milk", price: 3.19, category: "Beverages", rating: 4.7, reviews: 1000, image: "🥛" },
@@ -776,21 +774,28 @@ const standardizedProducts = [
     setIsCartOpen(false);
   };
 
-  // --- Enhanced normalization and grouping for canonical ingredients ---
-  // Place this before rendering the product cards for recipeIngredients
+  // --- Generalized normalization and grouping for all canonical ingredients ---
   const canonicalGroups = {};
   const nonCanonicalIngredients = [];
 
+  const canonicalKeys = Object.keys(canonicalIngredientMap);
+
   recipeIngredients.forEach(ingredient => {
     const lowerIngredient = ingredient.toLowerCase();
-    // Group all tomato-related ingredients
-    if (lowerIngredient.includes('tomato')) {
-      if (!canonicalGroups['tomato']) canonicalGroups['tomato'] = [];
-      canonicalGroups['tomato'].push(ingredient);
-      return;
+    let matchedGroup = null;
+    for (const key of canonicalKeys) {
+      // If the ingredient contains the canonical group keyword (e.g., 'cheese', 'pepper', etc.)
+      if (lowerIngredient.includes(key)) {
+        matchedGroup = key;
+        break;
+      }
     }
-    // Add more groupings here as needed (e.g., cheese, pepper, bean, etc.)
-    nonCanonicalIngredients.push(ingredient);
+    if (matchedGroup) {
+      if (!canonicalGroups[matchedGroup]) canonicalGroups[matchedGroup] = [];
+      canonicalGroups[matchedGroup].push(ingredient);
+    } else {
+      nonCanonicalIngredients.push(ingredient);
+    }
   });
 
   const normalizedIngredients = [];

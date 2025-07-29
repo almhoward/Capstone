@@ -327,11 +327,13 @@ const standardizedProducts = [
   // Canonical ingredient mapping for grouping similar products
   const canonicalIngredientMap = {
     tomato: [
-      'Fresh Tomatoes',
+      'Fresh Tomatoes',      
+      'Tomato',
       'Canned Diced Tomatoes',
       'Sun-Dried Tomatoes',
       'Tomato Sauce',
       'Tomato Paste',
+      'Tomatillo',
       'Marinara Sauce',
       'Ketchup',
     ],
@@ -566,7 +568,11 @@ const standardizedProducts = [
         if (isCanonical) {
           const showAll = expandedIngredients[ingredientKey];
           const productNames = showAll ? canonicalIngredientMap[ingredientKey] : [canonicalIngredientMap[ingredientKey][0]];
-          products = productNames.map(name => standardizedProducts.find(p => p.name.toLowerCase() === name.toLowerCase())).filter(Boolean);
+          products = productNames.map(name =>
+            standardizedProducts.find(p =>
+              p.name.toLowerCase().replace(/s$/, '') === name.toLowerCase().replace(/s$/, '')
+            )
+          ).filter(Boolean);
         } else {
           products = standardizedProducts.filter(p =>
             p.name.toLowerCase().includes(ingredient.toLowerCase()) || ingredient.toLowerCase().includes(p.name.toLowerCase())
@@ -907,7 +913,11 @@ const standardizedProducts = [
                   if (isCanonical) {
                     const showAll = expandedIngredients[ingredientKey];
                     const productNames = showAll ? canonicalIngredientMap[ingredientKey] : [canonicalIngredientMap[ingredientKey][0]];
-                    products = productNames.map(name => standardizedProducts.find(p => p.name.toLowerCase() === name.toLowerCase())).filter(Boolean);
+                    products = productNames.map(name =>
+                      standardizedProducts.find(p =>
+                        p.name.toLowerCase().replace(/s$/, '') === name.toLowerCase().replace(/s$/, '')
+                      )
+                    ).filter(Boolean);
                   } else {
                     products = standardizedProducts.filter(p =>
                       p.name.toLowerCase().includes(ingredient.toLowerCase()) || ingredient.toLowerCase().includes(p.name.toLowerCase())

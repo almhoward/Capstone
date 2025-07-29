@@ -327,7 +327,7 @@ const standardizedProducts = [
   // Canonical ingredient mapping for grouping similar products
   const canonicalIngredientMap = {
     tomato: [
-      'Fresh Tomatoes',      
+      'Fresh Tomatoes',      // Default representative for tomato group
       'Tomato',
       'Canned Diced Tomatoes',
       'Sun-Dried Tomatoes',
@@ -531,11 +531,57 @@ const standardizedProducts = [
   };
 
   // Filtering and Sorting Logic using useMemo
+  const recipeProductList = React.useMemo(() => {
+    if (recipeIngredients.length === 0) return [];
+
+    const productMap = new Map();
+    const seenCanonicalKeys = new Set();
+
+    recipeIngredients.forEach(ingredient => {
+      const lowerIngredient = ingredient.toLowerCase();
+      let canonicalKey = null;
+
+      if (canonicalIngredientMap[lowerIngredient]) {
+        canonicalKey = lowerIngredient;
+      } else if (canonicalIngredientMap[lowerIngredient.replace(/s$/, '')]) {
+        canonicalKey = lowerIngredient.replace(/s$/, '');
+      }
+
+      if (!canonicalKey) {
+        for (const key in canonicalIngredientMap) {
+          if (canonicalIngredientMap[key].some(val => val.toLowerCase() === lowerIngredient)) {
+            canonicalKey = key;
+            break;
+          }
+        }
+      }
+
+      if (canonicalKey) {
+        if (!seenCanonicalKeys.has(canonicalKey)) {
+          const showAll = expandedIngredients[canonicalKey];
+          const productNames = showAll ? canonicalIngredientMap[canonicalKey] : [canonicalIngredientMap[canonicalKey][0]];
+          const products = productNames.map(name => 
+            standardizedProducts.find(p => p.name.toLowerCase() === name.toLowerCase())
+          ).filter(Boolean);
+
+          products.forEach(p => productMap.set(p.id, p));
+          seenCanonicalKeys.add(canonicalKey);
+        }
+      } else {
+        const products = standardizedProducts.filter(p =>
+          p.name.toLowerCase().includes(lowerIngredient) || lowerIngredient.includes(p.name.toLowerCase())
+        );
+        products.forEach(p => productMap.set(p.id, p));
+      }
+    });
+
+    return Array.from(productMap.values());
+  }, [recipeIngredients, expandedIngredients, standardizedProducts]);
+
   const filteredProducts = React.useMemo(() => {
-    console.log("filteredProducts useMemo re-evaluating...");
-    console.log("currentCategory:", currentCategory);
-    console.log("recipeIngredients in useMemo:", recipeIngredients);
-    console.log("sortBy:", sortBy);
+    if (recipeIngredients.length > 0) {
+      return recipeProductList;
+    }
 
     let newFilteredProducts = [...standardizedProducts];
 
@@ -550,45 +596,6 @@ const standardizedProducts = [
         product.name.toLowerCase().includes(searchTermLower) ||
         product.category.toLowerCase().includes(searchTermLower)
       );
-    }
-
-    // Recipe ingredients filtering with canonical mapping
-    if (recipeIngredients.length > 0) {
-      let matchedProducts = [];
-      recipeIngredients.forEach(ingredient => {
-        // Enhanced ingredient key logic for noodles/lasagna
-        let ingredientKey = ingredient.toLowerCase().replace(/s$/, '');
-        if (ingredientKey.includes('lasagna')) {
-          ingredientKey = 'lasagna';
-        } else if (ingredientKey.includes('noodle')) {
-          ingredientKey = 'noodle';
-        }
-        const isCanonical = !!canonicalIngredientMap[ingredientKey];
-        let products = [];
-        if (isCanonical) {
-          const showAll = expandedIngredients[ingredientKey];
-          const productNames = showAll ? canonicalIngredientMap[ingredientKey] : [canonicalIngredientMap[ingredientKey][0]];
-          products = productNames.map(name =>
-            standardizedProducts.find(p =>
-              p.name.toLowerCase().replace(/s$/, '') === name.toLowerCase().replace(/s$/, '')
-            )
-          ).filter(Boolean);
-        } else {
-          products = standardizedProducts.filter(p =>
-            p.name.toLowerCase().includes(ingredient.toLowerCase()) || ingredient.toLowerCase().includes(p.name.toLowerCase())
-          );
-        }
-        
-        products = products.filter(p => !matchedProducts.some(mp => mp.id === p.id));
-
-        if (products.length > 0) {
-          products.forEach((product, idx) => {
-            matchedProducts.push(product);
-          });
-        }
-      });
-      // Remove duplicates
-      newFilteredProducts = Array.from(new Set(matchedProducts));
     }
 
     // Sorting
@@ -769,6 +776,41 @@ const standardizedProducts = [
     setIsCartOpen(false);
   };
 
+  // --- Enhanced normalization and grouping for canonical ingredients ---
+  // Place this before rendering the product cards for recipeIngredients
+  const canonicalGroups = {};
+  const nonCanonicalIngredients = [];
+
+  recipeIngredients.forEach(ingredient => {
+    const lowerIngredient = ingredient.toLowerCase();
+    // Group all tomato-related ingredients
+    if (lowerIngredient.includes('tomato')) {
+      if (!canonicalGroups['tomato']) canonicalGroups['tomato'] = [];
+      canonicalGroups['tomato'].push(ingredient);
+      return;
+    }
+    // Add more groupings here as needed (e.g., cheese, pepper, bean, etc.)
+    nonCanonicalIngredients.push(ingredient);
+  });
+
+  const normalizedIngredients = [];
+  Object.keys(canonicalGroups).forEach(groupKey => {
+    normalizedIngredients.push({
+      groupKey,
+      displayName: canonicalIngredientMap[groupKey][0],
+      isCanonical: true,
+      variations: canonicalGroups[groupKey],
+    });
+  });
+  nonCanonicalIngredients.forEach(ingredient => {
+    normalizedIngredients.push({
+      groupKey: ingredient.toLowerCase(),
+      displayName: ingredient,
+      isCanonical: false,
+      variations: [ingredient],
+    });
+  });
+
   return (
     <>
       <header className="header">
@@ -900,19 +942,11 @@ const standardizedProducts = [
                 const productCards = [];
                 const renderedProductIds = new Set();
 
-                recipeIngredients.forEach(ingredient => {
-                  // Enhanced ingredient key logic for noodles/lasagna
-                  let ingredientKey = ingredient.toLowerCase().replace(/s$/, '');
-                  if (ingredientKey.includes('lasagna')) {
-                    ingredientKey = 'lasagna';
-                  } else if (ingredientKey.includes('noodle')) {
-                    ingredientKey = 'noodle';
-                  }
-                  const isCanonical = !!canonicalIngredientMap[ingredientKey];
+                normalizedIngredients.forEach(({ groupKey, displayName, isCanonical, variations }) => {
                   let products = [];
                   if (isCanonical) {
-                    const showAll = expandedIngredients[ingredientKey];
-                    const productNames = showAll ? canonicalIngredientMap[ingredientKey] : [canonicalIngredientMap[ingredientKey][0]];
+                    const showAll = expandedIngredients[groupKey];
+                    const productNames = showAll ? canonicalIngredientMap[groupKey] : [canonicalIngredientMap[groupKey][0]];
                     products = productNames.map(name =>
                       standardizedProducts.find(p =>
                         p.name.toLowerCase().replace(/s$/, '') === name.toLowerCase().replace(/s$/, '')
@@ -920,12 +954,11 @@ const standardizedProducts = [
                     ).filter(Boolean);
                   } else {
                     products = standardizedProducts.filter(p =>
-                      p.name.toLowerCase().includes(ingredient.toLowerCase()) || ingredient.toLowerCase().includes(p.name.toLowerCase())
+                      p.name.toLowerCase().includes(displayName.toLowerCase()) ||
+                      displayName.toLowerCase().includes(p.name.toLowerCase())
                     );
                   }
-                  
                   products = products.filter(p => !renderedProductIds.has(p.id));
-
                   if (products.length > 0) {
                     products.forEach((product, idx) => {
                       renderedProductIds.add(product.id);
@@ -937,19 +970,25 @@ const standardizedProducts = [
                           <div className="product-info" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
                             <h3 className="product-title">{product.name}</h3>
                             <div style={{ height: 28, display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2, width: '100%' }}>
-                              {idx === 0 && isCanonical && canonicalIngredientMap[ingredientKey].length > 1 && (
+                              {idx === 0 && isCanonical && canonicalIngredientMap[groupKey].length > 1 && (
                                 <>
-                                  <span style={{ fontWeight: 600, fontSize: 15 }}>{ingredient.charAt(0).toUpperCase() + ingredient.slice(1)}</span>
+                                  <span style={{ fontWeight: 600, fontSize: 15 }}>{displayName}</span>
                                   <button
                                     className="expand-btn"
                                     style={{ fontSize: 13, color: '#2474E6', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
-                                    onClick={e => { e.stopPropagation(); setExpandedIngredients(prev => ({ ...prev, [ingredientKey]: !prev[ingredientKey] })); }}
+                                    onClick={e => { e.stopPropagation(); setExpandedIngredients(prev => ({ ...prev, [groupKey]: !prev[groupKey] })); }}
                                   >
-                                    {expandedIngredients[ingredientKey] ? 'Show less' : `Show all ${canonicalIngredientMap[ingredientKey].length} options`}
+                                    {expandedIngredients[groupKey] ? 'Show less' : `Show all ${canonicalIngredientMap[groupKey].length} options`}
                                   </button>
+                                  {/* Show variations if expanded */}
+                                  {expandedIngredients[groupKey] && variations.length > 1 && (
+                                    <ul style={{ margin: '8px 0 0 0', padding: 0, listStyle: 'disc inside', color: '#888', fontSize: 13 }}>
+                                      {variations.map((v, i) => <li key={i}>{v}</li>)}
+                                    </ul>
+                                  )}
                                 </>
                               )}
-                              {(idx !== 0 || !isCanonical || canonicalIngredientMap[ingredientKey].length <= 1) && (
+                              {(idx !== 0 || !isCanonical || canonicalIngredientMap[groupKey].length <= 1) && (
                                 <div style={{ height: 28 }}></div>
                               )}
                             </div>

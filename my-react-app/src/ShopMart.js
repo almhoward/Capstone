@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import './ShopMart.css';
 
 // SVG Star Components
@@ -24,37 +24,7 @@ const EmptyStar = ({ size = 22 }) => (
   </svg>
 );
 
-// Helper function to map old categories to new ones
-const categoryMap = {
-  // Fruits
-  'produce': 'Fruits', 'fruit': 'Fruits', 'fruits': 'Fruits',
-  // Vegetables
-  'vegetables': 'Vegetables', 'vegetable': 'Vegetables', 'salad greens': 'Vegetables', 'greens': 'Vegetables',
-  // Canned Goods
-  'canned goods': 'Canned Goods', 'canned': 'Canned Goods', 'broths & stocks': 'Canned Goods', 'sauces & condiments': 'Canned Goods', 'canned foods': 'Canned Goods', 'canned beans': 'Canned Goods', 'canned vegetables': 'Canned Goods',
-  // Dairy
-  'dairy & eggs': 'Dairy', 'dairy': 'Dairy', 'eggs': 'Dairy',
-  // Meat
-  'meats & protein': 'Meat', 'meat': 'Meat', 'chicken': 'Meat', 'beef': 'Meat', 'pork': 'Meat', 'sausage': 'Meat', 'bacon': 'Meat',
-  // Fish & Seafood
-  'seafood': 'Fish & Seafood', 'fish': 'Fish & Seafood', 'fish & seafood': 'Fish & Seafood',
-  // Deli
-  'deli meats': 'Deli', 'deli': 'Deli',
-  // Condiments & Spices
-  'spices & seasonings': 'Condiments & Spices', 'herbs': 'Condiments & Spices', 'sweeteners': 'Condiments & Spices', 'oils & fats': 'Condiments & Spices', 'oils & vinegars': 'Condiments & Spices', 'sauces & condiments': 'Condiments & Spices', 'flavor enhancers': 'Condiments & Spices', 'asian sauces': 'Condiments & Spices', 'specialty oils': 'Condiments & Spices', 'pickled items': 'Condiments & Spices',
-  // Snacks
-  'snacks': 'Snacks', 'chips': 'Snacks', 'pretzels': 'Snacks', 'popcorn': 'Snacks', 'crackers': 'Snacks', 'nuts': 'Snacks', 'dried fruits & nuts': 'Snacks', 'spreads': 'Snacks',
-  // Bread & Bakery
-  'bakery': 'Bread & Bakery', 'bread': 'Bread & Bakery', 'baking mixes': 'Bread & Bakery', 'pre-made doughs': 'Bread & Bakery',
-  // Beverages
-  'beverages': 'Beverages', 'coffee': 'Beverages', 'tea': 'Beverages', 'juice': 'Beverages', 'soda': 'Beverages', 'beer': 'Beverages', 'wine': 'Beverages', 'dairy alternatives': 'Beverages',
-  // Pasta, Rice & Cereal
-  'grains & pasta': 'Pasta, Rice & Cereal', 'pasta': 'Pasta, Rice & Cereal', 'rice': 'Pasta, Rice & Cereal', 'breakfast': 'Pasta, Rice & Cereal', 'cereal': 'Pasta, Rice & Cereal',
-  // Baking
-  'baking & flours': 'Baking', 'baking': 'Baking',
-  // Frozen Foods
-  'frozen foods': 'Frozen Foods', 'frozen vegetables': 'Frozen Foods', 'frozen': 'Frozen Foods', 'desserts': 'Frozen Foods', 'prepared meals': 'Frozen Foods', 'breakfast items': 'Frozen Foods',
-};
+
 
 // Map all products to new categories
 const standardizedProducts = [
@@ -490,10 +460,10 @@ const standardizedProducts = [
   // State variables
   const [cart, setCart] = useState([]);
   const [currentCategory, setCurrentCategory] = useState('all');
-  const allCategories = React.useMemo(() => [
+    const allCategories = React.useMemo(() => [
     'all',
     ...new Set(standardizedProducts.map(product => product.category))
-  ], [standardizedProducts]);
+  ], []);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchType, setSearchType] = useState('ingredient'); // 'ingredient' or 'recipe'
@@ -529,7 +499,7 @@ const standardizedProducts = [
   };
 
   // Filtering and Sorting Logic using useMemo
-  const recipeProductList = React.useMemo(() => {
+    const recipeProductList = React.useMemo(() => {
     if (recipeIngredients.length === 0) return [];
 
     const productMap = new Map();
@@ -574,9 +544,9 @@ const standardizedProducts = [
     });
 
     return Array.from(productMap.values());
-  }, [recipeIngredients, expandedIngredients, standardizedProducts]);
+  }, [recipeIngredients, expandedIngredients]);
 
-  const filteredProducts = React.useMemo(() => {
+    const filteredProducts = React.useMemo(() => {
     if (recipeIngredients.length > 0) {
       return recipeProductList;
     }
@@ -615,7 +585,7 @@ const standardizedProducts = [
     });
 
     return sortedProducts;
-  }, [standardizedProducts, currentCategory, searchTerm, searchType, recipeIngredients, sortBy, expandedIngredients]);
+  }, [currentCategory, searchTerm, searchType, recipeIngredients, sortBy, expandedIngredients, recipeProductList]);
 
   // Replace generateStars with SVG version
   const generateStars = (rating) => {
@@ -761,12 +731,7 @@ const standardizedProducts = [
     setIsCartOpen(false);
   };
 
-  const viewProduct = (productId) => {
-    const product = standardizedProducts.find(p => p.id === productId);
-    if (product) {
-      setSelectedProduct(product);
-    }
-  };
+  
 
   // Add this function inside ShopMart:
   const clearCart = () => {

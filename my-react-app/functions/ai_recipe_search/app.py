@@ -3,7 +3,7 @@ from flask_cors import CORS
 from .recipe_search import get_ingredients
 
 app = Flask(__name__)
-CORS(app, origins=['https://capstonesearchbar.web.app', 'http://localhost:3000'])
+CORS(app, origins=['https://capstonesearchbar.web.app', 'http://localhost:3000', 'http://127.0.0.1:5002', 'http://localhost:5002'])
 
 @app.route('/', methods=['GET'])
 def search_recipe():

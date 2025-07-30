@@ -72,7 +72,7 @@ Grape Jelly
     model = genai.GenerativeModel('gemini-2.5-flash-lite-preview-06-17')
     # Add a generation_config for quality
     generation_config = genai.types.GenerationConfig(
-        temperature=0.7,
+        temperature=0.2,
         top_p=0.85
     )
     response = model.generate_content(

@@ -31,6 +31,36 @@ def get_ingredients(user_query: str) -> list[str]:
     *   If "Butter" is mentioned, interpret it as a category that can include "peanut butter" or "almond butter".
     *   However, treat "peanut butter chips" as a distinct ingredient that should only be returned if explicitly part of the dish's common recipe.
 7.  **Prioritization:** Focus on the ingredients found in the most common, traditional preparation of the dish.
+8.  **Dish-Specific Guidelines:**
+    *   **Burgers/Sandwiches:** Include bread/bun, protein, lettuce, tomato, onion, cheese, and common condiments (mayo, mustard, ketchup).
+    *   **Salads:** Include greens, vegetables, protein (if common), cheese, and dressing.
+    *   **Pizza:** Include dough, sauce, cheese, and common toppings (pepperoni, mushrooms, etc.).
+    *   **Tacos/Burritos:** Include tortilla, protein, lettuce, tomato, cheese, sour cream, and salsa.
+    *   **Pasta:** Include pasta, sauce, cheese, and common additions (meat, vegetables).
+    *   **Asian Dishes:** Include rice/noodles, protein, vegetables, and sauce/seasoning.
+    *   **Breakfast:** Include main component, sides (toast, hash browns), and accompaniments (butter, syrup, milk).
+    *   **Desserts:** Include main component, toppings, and serving accompaniments (ice cream, whipped cream).
+    *   **Drinks:** Include base liquid, flavorings, and garnishes.
+    *   **Soups:** Include broth, vegetables, protein, and serving accompaniments (bread, crackers).
+
+9.  **Ingredient Categories to Consider:**
+    *   **Base Components:** Main structural elements (bread, pasta, rice, meat)
+    *   **Vegetables:** Fresh, cooked, or pickled vegetables
+    *   **Dairy:** Cheese, milk, yogurt, cream
+    *   **Condiments:** Sauces, spreads, dressings, dips
+    *   **Garnishes:** Fresh herbs, citrus, nuts, seeds
+    *   **Accompaniments:** Side items typically served with the dish
+    *   **Seasonings:** Spices, herbs, salt, pepper (only if substantial)
+
+10. **Regional/Cultural Considerations:**
+    *   For ethnic dishes, include traditional accompaniments and garnishes
+    *   Consider common serving styles and expected components
+    *   Include typical sauces, chutneys, or condiments specific to the cuisine
+
+11. **Dish Complexity Rules:**
+    *   For simple dishes (e.g., "apple"), include common serving accompaniments
+    *   For complex dishes, break down into component categories
+    *   For generic terms (e.g., "chicken"), include common preparation methods and sides
 
 **Example Output for "Peanut Butter and Jelly Sandwich":**
 Bread
@@ -42,7 +72,7 @@ Grape Jelly
     model = genai.GenerativeModel('gemini-2.5-flash-lite-preview-06-17')
     # Add a generation_config for quality
     generation_config = genai.types.GenerationConfig(
-        temperature=0.2,
+        temperature=0.7,
         top_p=0.85
     )
     response = model.generate_content(

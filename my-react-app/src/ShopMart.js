@@ -490,12 +490,34 @@ const standardizedProducts = [
         setShowScrollTop(false);
       }
     };
+    
+    // Add touch event handling for better mobile experience
+    const handleTouchStart = (e) => {
+      // Add haptic feedback for iOS devices
+      if (navigator.vibrate) {
+        navigator.vibrate(10);
+      }
+    };
+    
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('touchstart', handleTouchStart);
+    };
   }, []);
 
   const handleScrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Mobile-specific improvements
+    if (window.innerWidth <= 600) {
+      // Haptic feedback for scroll to top
+      if (navigator.vibrate) {
+        navigator.vibrate(30);
+      }
+    }
   };
 
   // Filtering and Sorting Logic using useMemo
@@ -627,6 +649,20 @@ const standardizedProducts = [
   const handleSearch = async () => {
     if (!searchTerm) return;
 
+    // Mobile-specific improvements
+    if (window.innerWidth <= 600) {
+      // Haptic feedback for search initiation
+      if (navigator.vibrate) {
+        navigator.vibrate(20);
+      }
+      
+      // Hide keyboard on mobile after search
+      const searchInput = document.querySelector('.search-input');
+      if (searchInput) {
+        searchInput.blur();
+      }
+    }
+
     if (searchType === 'recipe') {
       try {
         const response = await fetch(`https://us-central1-capstonesearchbar.cloudfunctions.net/searchRecipes/?query=${encodeURIComponent(searchTerm)}`);
@@ -700,10 +736,38 @@ const standardizedProducts = [
         return [...prevCart, { ...product, quantity: 1 }];
       }
     });
+    
+    // Mobile-specific feedback
+    if (window.innerWidth <= 600) {
+      // Visual feedback for mobile users
+      const cartIcon = document.querySelector('.cart-icon');
+      if (cartIcon) {
+        cartIcon.style.transform = 'scale(1.2)';
+        setTimeout(() => {
+          cartIcon.style.transform = 'scale(1)';
+        }, 200);
+      }
+      
+      // Haptic feedback if available
+      if (navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+    }
   };
 
   const toggleCart = () => {
     setIsCartOpen(prev => !prev);
+    
+    // Mobile-specific improvements
+    if (window.innerWidth <= 600) {
+      if (!isCartOpen) {
+        // Opening cart - prevent body scroll
+        document.body.style.overflow = 'hidden';
+      } else {
+        // Closing cart - restore body scroll
+        document.body.style.overflow = '';
+      }
+    }
   };
 
   const updateQuantity = (productId, change) => {
@@ -729,6 +793,17 @@ const standardizedProducts = [
     setShowThankYou(true);
     setCart([]);
     setIsCartOpen(false);
+    
+    // Mobile-specific improvements
+    if (window.innerWidth <= 600) {
+      // Restore body scroll when closing cart
+      document.body.style.overflow = '';
+      
+      // Haptic feedback for successful checkout
+      if (navigator.vibrate) {
+        navigator.vibrate([100, 50, 100]);
+      }
+    }
   };
 
   
@@ -737,6 +812,17 @@ const standardizedProducts = [
   const clearCart = () => {
     setCart([]);
     setIsCartOpen(false);
+    
+    // Mobile-specific improvements
+    if (window.innerWidth <= 600) {
+      // Restore body scroll when closing cart
+      document.body.style.overflow = '';
+      
+      // Haptic feedback for clearing cart
+      if (navigator.vibrate) {
+        navigator.vibrate(200);
+      }
+    }
   };
 
   // --- Generalized normalization and grouping for all canonical ingredients ---

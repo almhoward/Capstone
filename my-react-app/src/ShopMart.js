@@ -473,6 +473,7 @@ const standardizedProducts = [
   
   const [recipeIngredients, setRecipeIngredients] = useState([]);
   const [addedToCart, setAddedToCart] = useState({});
+  const [isSearchButtonPressed, setIsSearchButtonPressed] = useState(false);
   
   // Add at the top of the ShopMart function:
   const [showThankYou, setShowThankYou] = useState(false);
@@ -655,6 +656,12 @@ const standardizedProducts = [
       if (navigator.vibrate) {
         navigator.vibrate(20);
       }
+      
+      // Visual feedback for search button
+      setIsSearchButtonPressed(true);
+      setTimeout(() => {
+        setIsSearchButtonPressed(false);
+      }, 200); // Revert after 200ms
       
       // Hide keyboard on mobile after search
       const searchInput = document.querySelector('.search-input');
@@ -923,8 +930,8 @@ const standardizedProducts = [
                 </button>
               )}
             </div>
-            <button className="search-btn" onClick={handleSearch}>
-              Search
+            <button className={`search-btn ${isSearchButtonPressed ? 'pressed' : ''}`} onClick={handleSearch}>
+              🔍 Search
             </button>
             <button className="return-all-btn" onClick={() => handleCategoryFilter('all')}>🗑️</button>
           </div>

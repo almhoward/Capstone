@@ -381,6 +381,13 @@ body {
   font-weight: bold;
 }
 
+@media (max-width: 600px) {
+  .pagination-top,
+  .pagination-bottom {
+    display: none;
+  }
+}
+
 /* Products Container and Grid */
 .products-container {
   max-width: 1200px;
@@ -541,6 +548,32 @@ body {
 .pagination-ellipsis {
   padding: 8px 5px;
   color: #666666;
+}
+
+.load-more-btn {
+  background-color: #003366;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  width: 100%;
+  max-width: 300px;
+  margin-top: 20px;
+  box-shadow: 0 4px 12px rgba(0, 51, 102, 0.2);
+}
+
+.load-more-btn:hover {
+  background-color: #002244;
+  transform: translateY(-2px);
+}
+
+.load-more-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 51, 102, 0.15);
 }
 
 /* Cart Modal */

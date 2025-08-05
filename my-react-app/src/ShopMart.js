@@ -470,6 +470,8 @@ const standardizedProducts = [
   const [sortBy, setSortBy] = useState('name');
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage, setProductsPerPage] = useState(25); // Default to 25 products per page for 5 columns
+  const [productsPerPageMobile, setProductsPerPageMobile] = useState(10); // Default to 10 products per page for mobile
+  const [isMobile, setIsMobile] = useState(false);
   
   const [recipeIngredients, setRecipeIngredients] = useState([]);
   const [addedToCart, setAddedToCart] = useState({});
@@ -484,6 +486,10 @@ const standardizedProducts = [
   const [expandedIngredients, setExpandedIngredients] = useState({});
 
   React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 600);
+    };
+
     const handleScroll = () => {
       if (window.innerWidth <= 600) {
         setShowScrollTop(window.scrollY > 120);
@@ -500,14 +506,27 @@ const standardizedProducts = [
       }
     };
     
+    window.addEventListener('resize', handleResize);
     window.addEventListener('scroll', handleScroll);
     document.addEventListener('touchstart', handleTouchStart, { passive: true });
     
+    // Initial check
+    handleResize();
+
     return () => {
+      window.removeEventListener('resize', handleResize);
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('touchstart', handleTouchStart);
     };
   }, []);
+
+  React.useEffect(() => {
+    if (isMobile) {
+      setProductsPerPage(productsPerPageMobile);
+    } else {
+      setProductsPerPage(25); // Reset to default for desktop
+    }
+  }, [isMobile, productsPerPageMobile]);
 
   const handleScrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -627,9 +646,7 @@ const standardizedProducts = [
   
 
   // Pagination Logic
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  const currentProducts = filteredProducts.slice(0, currentPage * productsPerPage);
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
   const paginate = (pageNumber) => {
@@ -725,6 +742,10 @@ const standardizedProducts = [
     if (currentPage !== 1) {
       setCurrentPage(1); // Reset to first page when sort order changes
     }
+  };
+
+  const loadMore = () => {
+    setCurrentPage(prev => prev + 1);
   };
 
   
@@ -976,23 +997,25 @@ const standardizedProducts = [
             <option value="category">Category</option>
           </select>
         </div>
-        <div className="filter-group">
-          <label>Products per page:</label>
-          <select className="filter-select" value={productsPerPage} onChange={handleProductsPerPageChange}>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-            <option value="25">25</option>
-            <option value="30">30</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-          </select>
-        </div>
-        <div className="pagination-top">
-          {filteredProducts.length > 0 && (
+        {!isMobile && (
+          <div className="filter-group">
+            <label>Products per page:</label>
+            <select className="filter-select" value={productsPerPage} onChange={handleProductsPerPageChange}>
+              <option value="10">10</option>
+              <option value="15">15</option>
+              <option value="20">20</option>
+              <option value="25">25</option>
+              <option value="30">30</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+        )}
+        {!isMobile && filteredProducts.length > 0 && (
+          <div className="pagination-top">
             <span>Page {currentPage} of {totalPages}</span>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Products Container */}
@@ -1166,45 +1189,56 @@ const standardizedProducts = [
         )}
       </div>
 
-      {/* Bottom Pagination */}
-      {filteredProducts.length > 0 && totalPages > 1 && (
+      {/* Bottom Pagination / Load More */}
+      {filteredProducts.length > 0 && (
         <div className="pagination-bottom">
-          
-          
-          <button
-            className="pagination-btn"
-            onClick={() => paginate(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </button>
-          {/* Page numbers with ellipsis */}
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => {
-            // Display a limited range of pages around the current one
-            if (number === 1 || number === totalPages || (number >= currentPage - 2 && number <= currentPage + 2)) {
-              return (
+          {isMobile ? (
+            currentPage * productsPerPage < filteredProducts.length && (
+              <button
+                className="load-more-btn"
+                onClick={loadMore}
+              >
+                Load More
+              </button>
+            )
+          ) : (
+            totalPages > 1 && (
+              <>
                 <button
-                  key={number}
-                  className={`pagination-btn ${currentPage === number ? 'active' : ''}`}
-                  onClick={() => paginate(number)}
+                  className="pagination-btn"
+                  onClick={() => paginate(currentPage - 1)}
+                  disabled={currentPage === 1}
                 >
-                  {number}
+                  Previous
                 </button>
-              );
-            } else if (number === currentPage - 3 || number === currentPage + 3) {
-              return <span key={number} className="pagination-ellipsis">...</span>;
-            }
-            return null;
-          })}
-          <button
-            className="pagination-btn"
-            onClick={() => paginate(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </button>
-          
-          
+                {/* Page numbers with ellipsis */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => {
+                  // Display a limited range of pages around the current one
+                  if (number === 1 || number === totalPages || (number >= currentPage - 2 && number <= currentPage + 2)) {
+                    return (
+                      <button
+                        key={number}
+                        className={`pagination-btn ${currentPage === number ? 'active' : ''}`}
+                        onClick={() => paginate(number)}
+                      >
+                        {number}
+                      </button>
+                    );
+                  } else if (number === currentPage - 3 || number === currentPage + 3) {
+                    return <span key={number} className="pagination-ellipsis">...</span>;
+                  }
+                  return null;
+                })}
+                <button
+                  className="pagination-btn"
+                  onClick={() => paginate(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </button>
+              </>
+            )
+          )}
         </div>
       )}
 

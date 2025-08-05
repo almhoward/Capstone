@@ -936,24 +936,26 @@ const standardizedProducts = [
                 👨‍🍳 Recipe
               </button>
             </div>
-            <div className="search-input-group">
-              <input
-                type="text"
-                className="search-input"
-                placeholder={`Search for ${searchType === 'recipe' ? 'recipes' : 'ingredients'}...`}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyPress={(e) => { if (e.key === 'Enter') handleSearch(); }}
-              />
-              {searchTerm && (
-                <button className="clear-search-btn" onClick={() => setSearchTerm('')}>
-                  &times;
-                </button>
-              )}
+            <div className="search-controls">
+              <div className="search-input-group">
+                <input
+                  type="text"
+                  className="search-input"
+                  placeholder={`Search for ${searchType === 'recipe' ? 'recipes' : 'ingredients'}...`}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyPress={(e) => { if (e.key === 'Enter') handleSearch(); }}
+                />
+                {searchTerm && (
+                  <button className="clear-search-btn" onClick={() => setSearchTerm('')}>
+                    &times;
+                  </button>
+                )}
+              </div>
+              <button className={`search-btn ${isSearchButtonPressed ? 'pressed' : ''}`} onClick={handleSearch}>
+                🔍 Search
+              </button>
             </div>
-            <button className={`search-btn ${isSearchButtonPressed ? 'pressed' : ''}`} onClick={handleSearch}>
-              🔍 Search
-            </button>
             <button className="return-all-btn" onClick={() => handleCategoryFilter('all')}>🗑️</button>
           </div>
 

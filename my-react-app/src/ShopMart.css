@@ -896,6 +896,15 @@ body {
     justify-content: center;
     align-items: center;
   }
+
+  .search-controls {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    width: 100%;
+    gap: 12px;
+    align-items: center;
+  }
   
   /* Enhanced Toggle Switch */
   .toggle-switch {

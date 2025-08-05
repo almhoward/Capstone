@@ -940,7 +940,7 @@ const standardizedProducts = [
               <input
                 type="text"
                 className="search-input"
-                placeholder={`Search for ${searchType === 'recipe' ? 'recipes' : 'products'}...`}
+                placeholder={`Search for ${searchType === 'recipe' ? 'recipes' : 'ingredients'}...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyPress={(e) => { if (e.key === 'Enter') handleSearch(); }}

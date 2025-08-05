@@ -608,7 +608,7 @@ const standardizedProducts = [
     });
 
     return sortedProducts;
-  }, [currentCategory, searchTerm, searchType, recipeIngredients, sortBy, expandedIngredients, recipeProductList]);
+  }, [currentCategory, searchTerm, searchType, recipeIngredients, sortBy, recipeProductList]);
 
   // Replace generateStars with SVG version
   const generateStars = (rating) => {
